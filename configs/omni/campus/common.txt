@@ -1,0 +1,6 @@
+include = ../common.txt
+
+datadir = ./data/omni/campus
+basedir = ./log/campus
+use_envmap
+iter_pretrain_envmap = -1
