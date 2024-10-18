@@ -36,7 +36,7 @@ pip install -r requirement.txt
 data/
 └── omni/
     ├── video1/
-    │   ├── imgs/
+    │   ├── erp_imgs/
     │   │   ├── 1.png
     │   │   ├── 2.png
     │   │   └── ...
@@ -101,7 +101,7 @@ To get the custom recolored video, please apply the following changes in the `de
      ```python
      target_color = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype)
      ```
-     Set the target color to red (1.0, 0.0, 0.0).
+     This sets the target color to red `(1.0, 0.0, 0.0)`.
 3. **Update Recoloring Novel Palette Index**:
    - Modify the palette index in the following line:
      ```python
