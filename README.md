@@ -48,7 +48,7 @@ data/
     │   ├── test.txt
     │   └── train.txt
     ├── video2/
-    │   ├── imgs/
+    │   ├── erp_imgs/
     │   ├── output_dir/
     │   ├── test.txt
     │   └── train.txt
@@ -79,7 +79,7 @@ python main.py --config configs/omni/lab/default.txt --evaluation 1
 ```
 
 ## Editing/Recoloring
-Run the script below to get the recolored videos based on the learned recolorable OmniPlanes.
+To get the recolored videos based on the learned recolorable OmniPlanes, Run the script below.
 ```bash
 python palette_main.py --config configs/omni/specific_instance/default.txt --evaluation 1
 # For example
