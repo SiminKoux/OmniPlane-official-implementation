@@ -93,7 +93,7 @@ python palette_main.py --config configs/omni/lab/default.txt --evaluation 1
 ### Custom Recolored Video Instructions
 To get the custom recolored video, please apply the following changes in the `def evaluation()` function of the `renderer.py` file:
 1. **Enable Edit Mode**:
-   - Replace the line:
+   Replace the line:
      ```python
      edit = False
      ```
@@ -102,22 +102,22 @@ To get the custom recolored video, please apply the following changes in the `de
      edit = True
      ```
 2. **Set Target RGB Value**:
-   - Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
-   - For example:
+   Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
+     For example:
      ```python
      target_color = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype)
      ```
      This sets the target color to red `(1.0, 0.0, 0.0)`. It allows setting any target color you like.
 3. **Update Recoloring Novel Palette Index**:
-   - Modify the palette index in the following line:
+   Modify the palette index in the following line:
      ```python
      novel_palette[index, :] = target_color
      ```
-   - Ensure that `index` is within the valid range of the optimized palette.
-   - Common values are `0, 1, 2, 3, 4`.
+     Ensure that `index` is within the valid range of the optimized palette.
+     Common values are `0, 1, 2, 3, 4`.
 
 **Note: If it needs to change regions with different base colors, two or more `target_color` are allowed.**
-- For example,
+For example,
  ```python
      target_color_1 = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype)  # red
      target_color_2 = torch.tensor((0.0, 0.0, 1.0), dtype=novel_palette.dtype)  # blue
