@@ -118,7 +118,7 @@ To get the custom recolored video, please apply the following changes in the `de
 
      Common values are `0, 1, 2, 3, 4`.
 
-### Note: If it needs to change regions with different base colors, two or more `target_color' are allowed.
+**Note: If it needs to change regions with different base colors, two or more `target_color' are allowed.**
 For example,
  ```python
      target_color_1 = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype)  # red
