@@ -36,6 +36,10 @@ pip install -r requirement.txt
 data/
 └── omni/
     ├── video1/
+    │   ├── cpp_imgs/
+    │   │   ├── 1.png
+    │   │   ├── 2.png
+    │   │   └── ...
     │   ├── erp_imgs/
     │   │   ├── 1.png
     │   │   ├── 2.png
@@ -48,6 +52,7 @@ data/
     │   ├── test.txt
     │   └── train.txt
     ├── video2/
+    │   ├── cpp_imgs/
     │   ├── erp_imgs/
     │   ├── output_dir/
     │   ├── test.txt
