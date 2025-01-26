@@ -8,8 +8,270 @@ from PIL import Image
 import scipy.signal
 import plyfile
 import skimage.measure
+import matplotlib.pyplot as plt
+from scipy.spatial.transform import Slerp
+from scipy.spatial.transform import Rotation as R
 
 mse2psnr = lambda x : -10. * torch.log(x) / torch.log(torch.Tensor([10.]))
+
+
+def extract_euler(rotation_matrix):
+    ''' Extract Euler Angles (Roll, Pitch, Yaw) from rotation matrices '''
+    sy = torch.sqrt(rotation_matrix[0, 0]**2 + rotation_matrix[1, 0]**2)
+    singular = sy < 1e-6  # If sy is close to zero, there may be gimbal lock
+
+    if not singular:
+        roll = torch.atan2(rotation_matrix[2, 1], rotation_matrix[2, 2])
+        pitch = torch.atan2(-rotation_matrix[2, 0], sy)
+        yaw = torch.atan2(rotation_matrix[1, 0], rotation_matrix[0, 0])
+    else:
+        roll = torch.atan2(-rotation_matrix[1, 2], rotation_matrix[1, 1])
+        pitch = torch.atan2(-rotation_matrix[2, 0], sy)
+        yaw = 0.0
+    return torch.stack([roll, pitch, yaw])
+
+def vis_orientations(ori_poses, smoothed_poses, save_path='camera_orientations.png'):
+    # Extract camera orientations for original poses
+    ori_orientations = []
+    for pose in ori_poses:
+        rotation_matrix = pose[:3, :3]  # Extract rotation matrix
+        rpy = extract_euler(rotation_matrix)
+        ori_orientations.append(rpy)
+    ori_orientations = torch.stack(ori_orientations)
+
+    # Extract camera orientations for smoothed poses
+    smoothed_orientations = []
+    for pose in smoothed_poses:
+        rotation_matrix = pose[:3, :3]  # Extract rotation matrix
+        rpy = extract_euler(rotation_matrix)
+        smoothed_orientations.append(rpy)
+    smoothed_orientations = torch.stack(smoothed_orientations)
+
+    # Convert to numpy arrays for easier plotting with matplotlib
+    ori_orientations = ori_orientations.numpy()
+    smoothed_orientations = smoothed_orientations.numpy()
+
+    # Plot each orientation (Roll, Pitch, Yaw) in separate 2D line charts
+    fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+
+    # Plot Roll
+    axs[0].plot(ori_orientations[:, 0], label='Original Roll', linestyle='--', color='b')
+    axs[0].plot(smoothed_orientations[:, 0], label='Smoothed Roll', linestyle='-', color='r')
+    axs[0].set_title('Roll Over Time')
+    axs[0].set_xlabel('Time Step')
+    axs[0].set_ylabel('Roll (radians)')
+    axs[0].legend()
+
+    # Plot Pitch
+    axs[1].plot(ori_orientations[:, 1], label='Original Pitch', linestyle='--', color='b')
+    axs[1].plot(smoothed_orientations[:, 1], label='Smoothed Pitch', linestyle='-', color='r')
+    axs[1].set_title('Pitch Over Time')
+    axs[1].set_xlabel('Time Step')
+    axs[1].set_ylabel('Pitch (radians)')
+    axs[1].legend()
+
+    # Plot Yaw
+    axs[2].plot(ori_orientations[:, 2], label='Original Yaw', linestyle='--', color='b')
+    axs[2].plot(smoothed_orientations[:, 2], label='Smoothed Yaw', linestyle='-', color='r')
+    axs[2].set_title('Yaw Over Time')
+    axs[2].set_xlabel('Time Step')
+    axs[2].set_ylabel('Yaw (radians)')
+    axs[2].legend()
+
+    # Adjust layout for clarity
+    plt.tight_layout()
+    # Save the figure
+    plt.savefig(save_path)
+    plt.close(fig)
+
+def vis_positions(ori_poses, smoothed_poses, save_path='camera_positions.png'):
+    # Extract camera positions for original poses
+    ori_positions = []
+    for pose in ori_poses:
+        position = pose[:3, 3]
+        ori_positions.append(position)
+    ori_positions = torch.stack(ori_positions)
+
+    # Extract camera positions for smoothed poses
+    smoothed_positions = []
+    for pose in smoothed_poses:
+        position = pose[:3, 3]
+        smoothed_positions.append(position)
+    smoothed_positions = torch.stack(smoothed_positions)
+
+    # Convert to numpy arrays for easier plotting with matplotlib
+    ori_positions = ori_positions.numpy()
+    smoothed_positions = smoothed_positions.numpy()
+
+    # Plot each axis (X, Y, Z) in separate 2D line charts
+    fig, axs = plt.subplots(3, 1, figsize=(8, 12))
+
+    # Plot X axis
+    axs[0].plot(ori_positions[:, 0], label='Original X', linestyle='--', color='b')
+    axs[0].plot(smoothed_positions[:, 0], label='Smoothed X', linestyle='-', color='r')
+    axs[0].set_title('X Axis Over Time')
+    axs[0].set_xlabel('Time Step')
+    axs[0].set_ylabel('X Position')
+    axs[0].legend()
+
+    # Plot Y axis
+    axs[1].plot(ori_positions[:, 1], label='Original Y', linestyle='--', color='b')
+    axs[1].plot(smoothed_positions[:, 1], label='Smoothed Y', linestyle='-', color='r')
+    axs[1].set_title('Y Axis Over Time')
+    axs[1].set_xlabel('Time Step')
+    axs[1].set_ylabel('Y Position')
+    axs[1].legend()
+
+    # Plot Z axis
+    axs[2].plot(ori_positions[:, 2], label='Original Z', linestyle='--', color='b')
+    axs[2].plot(smoothed_positions[:, 2], label='Smoothed Z', linestyle='-', color='r')
+    axs[2].set_title('Z Axis Over Time')
+    axs[2].set_xlabel('Time Step')
+    axs[2].set_ylabel('Z Position')
+    axs[2].legend()
+
+    # Adjust layout for clarity and save the figure
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close(fig)
+
+def vis_camera(ori_poses, smoothed_poses):
+     # Extract camera positions (translations) for original poses
+    ori_positions = []
+    for pose in ori_poses:
+        position = pose[:3, 3]  # Extract translation (camera position)
+        ori_positions.append(position)
+    ori_positions = torch.stack(ori_positions)
+
+    # Extract camera positions (translations) for smoothed poses
+    smoothed_positions = []
+    for pose in smoothed_poses:
+        position = pose[:3, 3]  # Extract translation (camera position)
+        smoothed_positions.append(position)
+    smoothed_positions = torch.stack(smoothed_positions)
+
+    # Convert to numpy arrays for easier plotting with matplotlib
+    ori_positions = ori_positions.numpy()
+    smoothed_positions = smoothed_positions.numpy()
+
+    # Visualize the two sets of camera positions connected with lines
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot original camera positions as a connected line
+    ax.plot(ori_positions[:, 0], 
+            ori_positions[:, 1], 
+            ori_positions[:, 2], 
+            color='b',
+            linestyle='--', 
+            label='Original Positions')
+
+    # Plot smoothed camera positions as a connected line
+    ax.plot(smoothed_positions[:, 0], 
+            smoothed_positions[:, 1], 
+            smoothed_positions[:, 2], 
+            color='r', 
+            linestyle='-',
+            label='Smoothed Positions')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.set_title('Camera Positions Over Time')
+    ax.legend()
+    plt.show()
+
+def stabilize_camera_poses(c2w_matrices, kernel_size=5, sigma=2.0): 
+    ''' 
+    Stabilize the camera poses represented by c2w matrices. 
+    ''' 
+    translations = [] 
+    quaternions = [] 
+
+    # Step 1: Extract translations and convert rotation matrices to quaternions 
+    for c2w in c2w_matrices:
+        rot_matrix = c2w[:3, :3] # tensor - [3, 3]
+        translation = c2w[:3, 3] # tensor - [3]
+        quat = R.from_matrix(rot_matrix).as_quat() # numpy.ndarray - (4, )
+        translations.append(translation)
+        quaternions.append(quat) 
+
+    # Step 2: Smooth translations using Gaussian filter 
+    smoothed_translations = apply_gaussian_filter_to_trans(translations, kernel_size=kernel_size, sigma=sigma) # [num_poses, 3]
+
+    # Step 3: Smooth rotations using slerp on quaternions 
+    smoothed_quaternions = apply_slerp_to_quats(quaternions)  # List(numpy.ndarray), len: num_poses
+
+    # Step 4: Reconstruct smoothed c2w matrices 
+    smoothed_c2w_matrices = [] 
+
+    for i in range(len(c2w_matrices)): 
+        smoothed_rot_matrix = R.from_quat(smoothed_quaternions[i]).as_matrix()  # (3, 3) from quaternion 
+        smoothed_rot_matrix = torch.from_numpy(smoothed_rot_matrix)  # Convert to tensor [3, 3]
+        smoothed_translation = smoothed_translations[i] 
+
+        # Reconstruct the c2w matrix with smoothed rotation and translation 
+        smoothed_c2w = torch.eye(4)
+        smoothed_c2w[:3, :3] = smoothed_rot_matrix 
+        smoothed_c2w[:3, 3] = smoothed_translation 
+        smoothed_c2w_matrices.append(smoothed_c2w) 
+    return smoothed_c2w_matrices 
+
+def gaussian_filter_1d(kernel_size, sigma): 
+    x = torch.arange(-kernel_size // 2 + 1, kernel_size // 2 + 1) 
+    kernel = torch.exp(-0.5 * (x.float() / sigma) ** 2) 
+    kernel = kernel / kernel.sum() 
+    return kernel 
+
+def apply_gaussian_filter_to_trans(translations, kernel_size=5, sigma=2.0): 
+    ''' 
+    Apply 1D Gaussian filter to the translation components of camera poses. 
+    ''' 
+    # translations = torch.tensor(translations, dtype=torch.float32)
+    translations = torch.stack(translations) # [num_poses, 3]
+    kernel = gaussian_filter_1d(kernel_size, sigma).view(1, 1, -1)  # [1, 1, kernel_size] 
+
+    # Pad the translations along the sequence dimension
+    translations = translations.unsqueeze(0).permute(2, 0, 1)  # [3, 1, num_poses] 
+    translations = F.pad(translations, (kernel_size // 2, kernel_size // 2), mode='replicate') 
+
+    # Apply 1D convolution (Gaussian smoothing) 
+    smoothed_translations = F.conv1d(translations, kernel, padding=0).squeeze().permute(1, 0)
+    return smoothed_translations
+
+def slerp(t, q0, q1): 
+    ''' 
+    Perform spherical linear interpolation (slerp) between two quaternions q0 and q1 
+    t is a value between 0 and 1 indicating the interpolation factor. 
+    ''' 
+    q0 = R.from_quat(q0)
+    q1 = R.from_quat(q1) 
+    
+    # Define the keyframe times (0 and 1 for the two quaternions)
+    key_times = np.array([0, 1])
+    
+    # Create a Slerp object with the two quaternions
+    slerp = Slerp(key_times, R.from_quat([q0.as_quat(), q1.as_quat()]))
+    
+    # Interpolate at time t (where t is between 0 and 1)
+    interpolated_rotation = slerp(t).as_quat()
+    smoothed_rotation = torch.from_numpy(interpolated_rotation)
+    return smoothed_rotation
+
+def apply_slerp_to_quats(quaternions): 
+    ''' 
+    Smooth quaternions using spherical linear interpolation (slerp). 
+    ''' 
+    num_poses = len(quaternions) 
+    smoothed_quaternions = [quaternions[0]]  # Start with the first quaternion 
+
+    for i in range(1, num_poses): 
+        prev_q = smoothed_quaternions[-1] 
+        next_q = quaternions[i] 
+        smoothed_q = slerp(0.5, prev_q, next_q)  # Interpolate halfway 
+        smoothed_quaternions.append(smoothed_q) 
+
+    return smoothed_quaternions
 
 def nanmin(tensor, dim=None):
     # Mask to filter out NaN values
