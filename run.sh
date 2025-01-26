@@ -26,11 +26,18 @@ python main.py --config configs/omni/lab/default.txt --stabilize 1
 # change the corresponding .txt name
 # For example, if train for indoor scene 'Lab' in werp grids, 
 # please let the 'common_werp_palette_indoor.txt' renamed into 'common.txt' 
-python palette_main.py --config configs/omni/lab/default.txt
+python main.py --config configs/omni/lab/default.txt --palette_train 1
 
-# Editing/Recoloring (Inference for recolored videos based on the stage 2's model) 
+# Editing (Inference for recolored videos based on the stage 2's model) 
 # change the corresponding .txt name
 # For example, if train for indoor scene 'Lab' in werp grids, 
-# please let the 'common_werp_palette_indoor.txt' renamed into 'common.txt' 
-# where replace 'edit = False' in the ./renderer/def evaluation function with 'edit = True'
-python palette_main.py --config configs/omni/lab/default.txt --evaluation 1
+# please let the 'common_werp_palette_indoor.txt' renamed into 'common.txt'
+# There are different editing options:
+# 1. Recoloring
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --recolor
+# 2. Relighting
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --relighting
+# 3. Retexturing
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --retexture
+# 4. soft and hard segmentation
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --visualize_seg
