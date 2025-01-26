@@ -14,7 +14,7 @@ python main.py --config configs/omni/lab/default.txt --evaluation 1
 # change the corresponding .txt name
 # For example, if train for indoor scene 'Lab' in werp grids, 
 # please let the 'common_werp_stabilize_indoor.txt' renamed into 'common.txt' 
-ython main.py --config configs/omni/lab/default.txt --stabilize 1
+python main.py --config configs/omni/lab/default.txt --stabilize 1
 
 # Training - Stage 2 (Color Decomposion) 
 # change the corresponding .txt name
