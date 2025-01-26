@@ -166,11 +166,11 @@ class OmniPlanes(TensorBase):
             grad_vars += [{'params': self.density_regressor.parameters(), 'lr': lr_init_network}]
         if isinstance(self.renderModule, torch.nn.Module):
             grad_vars += [{'params': self.renderModule.parameters(), 'lr': lr_init_network}]
-        if isinstance(self.diffuseModule, torch.nn.Module):
-            grad_vars += [{'params': self.diffuseModule.parameters(), 'lr': lr_init_network}]
-        if isinstance(self.palette_basis, torch.nn.Module):
-            grad_vars += [{'params': self.palette_basis.parameters(), 'lr': lr_init_network}]
         if self.use_palette:
+            if isinstance(self.diffuseModule, torch.nn.Module):
+                grad_vars += [{'params': self.diffuseModule.parameters(), 'lr': lr_init_network}]
+            if isinstance(self.palette_basis, torch.nn.Module):
+                grad_vars += [{'params': self.palette_basis.parameters(), 'lr': lr_init_network}]
             grad_vars += [{'params': self.basis_color, 'lr': lr_init_network},
                           {'params': self.hist_weights, 'lr': lr_init_network}]
         if self.envmap is not None:
@@ -202,7 +202,7 @@ class OmniPlanes(TensorBase):
         self.load_state_dict(ckpt['state_dict'], strict=strict)
         if self.coarse_sigma_grid_update_rule == 'conv':
             self.update_coarse_sigma_grid()
-        # return ckpt['global_step']
+        return ckpt['global_step']
 
     def vectorDiffs(self, vector_comps):
         total = 0
@@ -1188,28 +1188,28 @@ class OmniPlanes(TensorBase):
             offset_norm = offset_norm.reshape(B, N, 1)             # [B, N, 1]
             out_radiance = (F.softplus(radiance)).reshape(B, N, 1) # [B, N, 1]
             
-        # Composition for each feature vectors
+            # Composition for each feature vectors
+            soft_color_map = torch.sum(weight[..., None] * soft_color, -2)    # [4096, num_basis*3]
+            final_color_map = torch.sum(weight[..., None] * final_color, -2)  # [4096, num_basis*3]
+            basis_rgb_map = torch.sum(weight[..., None] * basis_color, -2)    # [4096, num_basis*3]
+            diffuse_rgb_map = torch.sum(weight[..., None] * diffuse_rgb, -2)  # [4096, 3]
+            direct_rgb_map = torch.sum(weight[..., None] * direct_rgb, -2)    # [4096, 3]
+            final_rgb_map = torch.sum(weight[..., None] * final_rgb, -2)      # [4096, 3]
+
+            # Calculate the sum of weights for normalization
+            weights_sum = weight.sum(dim=1, keepdim=True)  # Shape [B, 1]
+            # Normalize the weights
+            normalized_weight = weight / weights_sum  # Shape [B, N]
+            omega_map = torch.sum(normalized_weight[..., None] * omega, -2)              # [4096, num_basis]
+            radiance_map = torch.sum(normalized_weight[..., None] * out_radiance, -2)    # [4096, 1]
+        
+            omega_sparsity_map = torch.sum(normalized_weight[..., None] * omega_sparsity, -2) # [4096, 1]
+            offset_norm_map = torch.sum(normalized_weight[..., None] * offset_norm, -2)       # [4096, 1]
+            view_dep_norm_map = torch.sum(weight[..., None] * view_dep_norm, -2)   # [4096, 1]
+        #########################
+        
         acc_map = torch.sum(weight, -1)  # [4096]
         rgb_map = torch.sum(weight[..., None] * rgb, -2)  # [4096, 3]
-        soft_color_map = torch.sum(weight[..., None] * soft_color, -2)    # [4096, num_basis*3]
-        final_color_map = torch.sum(weight[..., None] * final_color, -2)  # [4096, num_basis*3]
-        basis_rgb_map = torch.sum(weight[..., None] * basis_color, -2)    # [4096, num_basis*3]
-        diffuse_rgb_map = torch.sum(weight[..., None] * diffuse_rgb, -2)  # [4096, 3]
-        direct_rgb_map = torch.sum(weight[..., None] * direct_rgb, -2)    # [4096, 3]
-        final_rgb_map = torch.sum(weight[..., None] * final_rgb, -2)      # [4096, 3]
-
-        # Calculate the sum of weights for normalization
-        weights_sum = weight.sum(dim=1, keepdim=True)  # Shape [B, 1]
-        # Normalize the weights
-        normalized_weight = weight / weights_sum  # Shape [B, N]
-        omega_map = torch.sum(normalized_weight[..., None] * omega, -2)              # [4096, num_basis]
-        radiance_map = torch.sum(normalized_weight[..., None] * out_radiance, -2)    # [4096, 1]
-       
-        omega_sparsity_map = torch.sum(normalized_weight[..., None] * omega_sparsity, -2) # [4096, 1]
-        offset_norm_map = torch.sum(normalized_weight[..., None] * offset_norm, -2)       # [4096, 1]
-        view_dep_norm_map = torch.sum(weight[..., None] * view_dep_norm, -2)   # [4096, 1]
-        #########################
-
         bg_map = None
         env_map = None
         if self.envmap is not None:
