@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 
+# SimpleSampler: simple sampler that randomly samples a batch of data
 class SimpleSampler:
     def __init__(self, total, batch):
         self.total = total
@@ -15,7 +16,7 @@ class SimpleSampler:
             self.curr = 0
         return self.ids[self.curr:self.curr+self.batch]
 
-
+# ThetaImportanceSampler: sampler that samples data with importance sampling
 class ThetaImportanceSampler:
     def __init__(self, theta_importance_lambda, img_len, img_wh, batch, roi):
         self.img_len = img_len
