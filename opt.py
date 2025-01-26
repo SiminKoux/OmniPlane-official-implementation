@@ -213,7 +213,6 @@ def config_parser(default_files=None):
     parser.add_argument("--perturb", type=float, default=1.,
                         help='set to 0. for no jitter, 1. for jitter')
     parser.add_argument("--accumulate_decay", type=float, default=0.998)
-    parser.add_argument('--ndc_ray', type=int, default=0)
     
     
     # Sampling Settings
