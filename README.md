@@ -68,7 +68,7 @@ python main.py --config configs/omni/specific_instance/default.txt
 # For example
 python main.py --config configs/omni/lab/default.txt
 ```
-if you would like to avoid evaluation in the training process, you could comment out the following lines in the ``train" function：
+If you want to exclude evaluation during the training process, you can comment out the following lines in the `def train()` function:
 ```
 if (iteration + 1) in vis_list and args.N_vis != 0:
             PSNRs_test = evaluation(
