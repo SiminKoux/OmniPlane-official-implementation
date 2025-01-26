@@ -1169,6 +1169,7 @@ class OmniPlanes(TensorBase):
             omega = omega.view(-1, self.num_basis, 1)     # [B*N, num_basis, 1]
             
             soft_color = basis_color.to(device) + offset    # [B*N, num_basis, 3]
+            scaled_color = basis_color.to(device) * 1 * offset  # [B*N, num_basis, 3]
             final_color = F.softplus(radiance) * soft_color # [B*N, num_basis, 3]
             basis_rgb = omega * final_color                 # [B*N, num_basis, 3]
             basis_rgb = basis_rgb.view(B, N, self.num_basis, 3) # [B, N, num_basis, 3]
@@ -1182,6 +1183,7 @@ class OmniPlanes(TensorBase):
            
             omega = omega.view(B, N, self.num_basis)            # [B, N, num_basis]
             soft_color = soft_color.reshape(B, N, self.num_basis*3)   # [B, N, num_basis*3]
+            scaled_color = scaled_color.reshape(B, N, self.num_basis*3) # [B, N, num_basis*3]
             basis_color = basis_rgb.reshape(B, N, self.num_basis*3)   # [B, N, num_basis*3] 
             final_color = final_color.reshape(B, N, self.num_basis*3) # [B, N, num_basis*3]
             omega_sparsity = omega_sparsity.reshape(B, N, 1)       # [B, N, 1]
@@ -1190,6 +1192,7 @@ class OmniPlanes(TensorBase):
             
             # Composition for each feature vectors
             soft_color_map = torch.sum(weight[..., None] * soft_color, -2)    # [4096, num_basis*3]
+            scaled_color_map = torch.sum(weight[..., None] * scaled_color, -2)  # [4096, num_basis*3]
             final_color_map = torch.sum(weight[..., None] * final_color, -2)  # [4096, num_basis*3]
             basis_rgb_map = torch.sum(weight[..., None] * basis_color, -2)    # [4096, num_basis*3]
             diffuse_rgb_map = torch.sum(weight[..., None] * diffuse_rgb, -2)  # [4096, 3]
@@ -1226,6 +1229,7 @@ class OmniPlanes(TensorBase):
             final_rgb_map = final_rgb_map.clamp(0, 1)      # [4096, 3]
             basis_rgb_map = basis_rgb_map.clamp(0, 1)      # [4096, num_basis*3]
             soft_color_map = soft_color_map.clamp(0, 1)    # [4096, num_basis*3]
+            scaled_color_map = scaled_color_map.clamp(0, 1)  # [4096, num_basis*3]
             final_color_map = final_color_map.clamp(0, 1)  # [4096, num_basis*3]
 
         with torch.no_grad():
@@ -1247,6 +1251,7 @@ class OmniPlanes(TensorBase):
                     "basis_rgb_map": basis_rgb_map,
                     "final_color_map": final_color_map,
                     "soft_color_map": soft_color_map,
+                    "scaled_color_map": scaled_color_map,
 
                     "omega_map": omega_map,
                     "radiance_map": radiance_map,
