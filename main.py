@@ -4,7 +4,7 @@ import random
 from tqdm.auto import tqdm
 from opt import recursive_config_parser, export_config
 
-from renderer import volume_renderer, evaluation, render_for_stabilizer
+from renderer import volume_renderer, evaluation, render_for_stabilizer, palette_extract
 from utils import *
 from torch.utils.tensorboard import SummaryWriter
 import datetime
@@ -142,6 +142,63 @@ def stabilizer(args):
         interval_th=args.interval_th
     )
 
+
+@torch.no_grad()
+def palette_extractor(args):
+    if args.metric_only:
+        raise NotImplementedError
+    # init dataset
+    dataset = dataset_dict[args.dataset_name]
+    load_params = {
+        "data_dir": args.datadir,
+        "split": "test",
+        "is_stack": True,
+        "use_gt_depth": args.use_gt_depth,
+        "downsample": 1,
+        "near_far": args.near_far,
+        "roi": args.roi,
+        "localization_method": args.localization_method,
+        "skip": 1
+    }
+    test_dataset = dataset(**load_params)
+
+    if args.ckpt is None:
+        ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}.th')
+    else:
+        ckpt = args.ckpt
+    print("ckpt:", ckpt)
+
+    if not os.path.exists(ckpt):
+        print('the ckpt path does not exists!!')
+        return
+
+    ckpt = torch.load(ckpt, map_location=device)
+    kwargs = ckpt['kwargs']
+    kwargs.update({'device': device})
+
+    # Evaluation
+    model = eval(args.model_name)(**kwargs)
+    model.load(ckpt)
+    renderer = volume_renderer
+
+    palette_dir = f'{args.basedir}/{args.expname}/palette'
+    os.makedirs(palette_dir, exist_ok=True)
+
+    palette_extract(
+        test_dataset=test_dataset, 
+        model=model,
+        renderer=renderer, 
+        savePath=palette_dir, 
+        N_vis=-1, 
+        n_coarse=args.n_coarse, 
+        n_fine=args.n_fine,
+        device=device, 
+        exp_sampling=args.exp_sampling,
+        resampling=args.resampling, 
+        empty_gpu_cache=True, 
+        use_coarse_sample=args.use_coarse_sample, 
+        interval_th=args.interval_th
+    )
 
 def train(args):
     # init dataset
@@ -576,6 +633,9 @@ if __name__ == '__main__':
     elif args.stabilize:
         # run stabilizer
         stabilizer(args)
+    elif args.palette_extract:
+        # run palette extractor
+        palette_extractor(args)
     else:
         # run train
         train(args)
