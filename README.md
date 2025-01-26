@@ -6,7 +6,7 @@ This repository is the offical PyTorch implementation of [OmniPlanes](https://ie
 OmniPlanes is a feature-grid-based dynamic scene representation for modeling Omnidirectional (360-degree) videos, utilizing weighted ERP spherical coordinates with time dependency. Incorporating palette-based color decomposition to achieve intuitive recoloring.
 
 ## Installation
-We tested the code on RTX 3090Ti GPU, using cuda11.3 with PyTorch 1.10.0 in a Python 3.9 environment.
+We tested the code on RTX 3090Ti GPU, PyTorch 1.10.1 in a Python 3.9 environment.
 
 ### Clone the repository
 ```bash
@@ -28,10 +28,8 @@ conda create -n omniplanes python=3.9
 conda activate omniplanes
 
 # Install dependencies
-conda install pytorch==1.10.0 torchvision==0.11.0 torchaudio==0.10.0 cudatoolkit=11.3 -c pytorch -c conda-forge
-or
 pip install torch==1.10.1 torchvision==0.11.2 torchaudio==0.10.1
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 ## Dataset Composition
 You can download our [DyOmni](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q) dataset.
