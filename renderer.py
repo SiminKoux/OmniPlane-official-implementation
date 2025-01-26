@@ -10,6 +10,52 @@ from models.OmniPlanes import OmniPlanes
 from models.YinYang_OmniPlanes import YinYang_OmniPlanes
 from utils import *
 
+def visualize_segmentation(omega_map, palette, H, W, savePath, frame_idx, soft=True,
+                           threshold=0.3, target_indices=None, bg_color=[1.0, 1.0, 1.0]):
+    """
+    Visualize palette-based segmentation results.
+    Args:
+        omega_map: [M, num_basis] blending weights
+        palette: [num_basis, 3] palette colors
+        H, W: image size
+        savePath: save directory
+        frame_idx: frame index
+        soft: whether to visualize soft segmentation
+        threshold: threshold for hard segmentation
+        target_indices: target indices for the seleced bases
+        bg_color: background color
+    """
+    if soft:
+        # soft segmentation - blend colors using omega weights
+       seg_map = omega_map @ palette  # [M, 3]
+    else:
+        # Threshold-based hard segmentation
+        # Initialize with background color
+        seg_map = torch.tensor(bg_color).repeat(omega_map.shape[0], 1) # [M, 3]
+        if target_indices is None:
+            # Only consider target palette weights
+            target_omega = omega_map[:, target_indices]  # [M, num_target]
+            masks = target_omega > threshold
+
+            # Find valid pixels (above threshold for target bases)
+            valid_pixels = masks.any(dim=1)  # [M]
+
+            if valid_pixels.any():
+                # Get max palette base amnog the target bases only
+                max_target_idx = torch.argmax(target_omega[valid_pixels], dim=1)  # [M], Index in target_indices
+                actual_idx = torch.tensor(target_indices)[max_target_idx]  # Convert to original palette indices
+
+                # Apply colors only for valid pixels
+                seg_map[valid_pixels] = palette[actual_idx]  # [M, 3]
+        
+        # Reshape to image size and save
+        seg_map = seg_map.reshape(H, W, 3)
+        seg_map = (seg_map.numpy() * 255).astype('uint8')
+
+        # Save the segmentation map
+        suffix = 'soft' if soft else f'hard_th{threshold}'
+        os.makedirs(f'{savePath}/segmentation_{suffix}', exist_ok=True)
+        imageio.imwrite(f'{savePath}/segmentation_{suffix}/{frame_idx:03d}.png', seg_map)
 
 def volume_renderer(
         rays, 
@@ -38,7 +84,7 @@ def volume_renderer(
     bg_maps, env_maps = [], []
     if use_palette:
         final_rgbs, diffuse_rgbs, direct_rgbs = [], [], []
-        basis_rgbs, final_colors, soft_colors = [], [], []
+        basis_rgbs, final_colors, soft_colors, scaled_colors = [], [], [], []
         omegas, radiance_maps = [], []
         omega_sparsitys, offset_norms, view_dep_norms = [], [], []
     N_rays_all = rays.shape[0]  # 4096
@@ -99,6 +145,7 @@ def volume_renderer(
                 basis_rgb_map_np = output_dict['basis_rgb_map'].cpu().numpy()
                 final_color_map_np = output_dict['final_color_map'].cpu().numpy()
                 soft_color_map_np = output_dict['soft_color_map'].cpu().numpy()
+                scaled_color_map_np = output_dict['scaled_color_map'].cpu().numpy()
                 
                 omega_map_np = output_dict['omega_map'].cpu().numpy()
                 radiance_map_np = output_dict['radiance_map'].cpu().numpy()
@@ -114,6 +161,7 @@ def volume_renderer(
                 basis_rgbs.append(basis_rgb_map_np)
                 final_colors.append(final_color_map_np)
                 soft_colors.append(soft_color_map_np)
+                scaled_colors.append(scaled_color_map_np)
                 
                 omegas.append(omega_map_np)
                 radiance_maps.append(radiance_map_np)
@@ -142,6 +190,7 @@ def volume_renderer(
                 basis_rgbs.append(output_dict['basis_rgb_map'])
                 final_colors.append(output_dict['final_color_map'])
                 soft_colors.append(output_dict['soft_color_map'])
+                scaled_colors.append(output_dict['scaled_color_map'])
                 
                 omegas.append(output_dict['omega_map'])
                 radiance_maps.append(output_dict['radiance_map'])
@@ -173,6 +222,7 @@ def volume_renderer(
                         "basis_rgbs": torch.cat(basis_rgbs),
                         "final_colors": torch.cat(final_colors),
                         "soft_colors": torch.cat(soft_colors),
+                        "scaled_colors": torch.cat(scaled_colors),
                         
                         "basis_acc": torch.cat(omegas),
                         "radiance_maps": torch.cat(radiance_maps),
@@ -195,6 +245,7 @@ def volume_renderer(
                         "basis_rgbs": torch.cat(basis_rgbs),
                         "final_colors": torch.cat(final_colors),
                         "soft_colors": torch.cat(soft_colors),
+                        "scaled_colors": torch.cat(scaled_colors),
 
                         "basis_acc": torch.cat(omegas),
                         "radiance_maps": torch.cat(radiance_maps),
@@ -236,6 +287,7 @@ def volume_renderer(
                         "basis_rgbs": np.concatenate(basis_rgbs),
                         "final_colors": np.concatenate(final_colors),
                         "soft_colors": np.concatenate(soft_colors),
+                        "scaled_colors": np.concatenate(scaled_colors),
                         
                         "basis_acc": np.concatenate(omegas),
                         "radiance_maps": np.concatenate(radiance_maps),
@@ -258,6 +310,7 @@ def volume_renderer(
                         "basis_rgbs": np.concatenate(basis_rgbs),
                         "final_colors": np.concatenate(final_colors),
                         "soft_colors": np.concatenate(soft_colors),
+                        "scaled_colors": np.concatenate(scaled_colors),
                         
                         "basis_acc": np.concatenate(omegas),
                         "radiance_maps": np.concatenate(radiance_maps),
@@ -300,35 +353,40 @@ def evaluation(
         resampling=False, 
         use_coarse_sample=True, 
         use_palette=False,
-        interval_th=False
+        interval_th=False,
+        test=True,
+        recolor=False,
+        lighting=False,
+        texture=False,
+        mask=False,
+        save=False
 ):
     """
     Evaluate the model on the test rays and compute metrics.
     """
     model.eval()
     PSNRs, ssims, l_alex, l_vgg = [], [], [], []
-    
-    # original_palette = model.basis_color.clone().clamp(0., 1.)  # [num_basis, 3]
-    # print("original_palette:\n", original_palette)
-    # visualize_colors(original_palette, savePath + "_Optimized_Palette.png")
-
-    edit = False
-    save = False
 
     if use_palette:
         if save:
             os.makedirs(savePath + "/out_dict", exist_ok=True)
-        elif edit:
-            os.makedirs(savePath + "/edited_frames", exist_ok=True)
+        elif recolor:
+            os.makedirs(savePath + "/recolored_frames", exist_ok=True)
+            os.makedirs(savePath + "/original_frames", exist_ok=True)
+        elif lighting:
+            os.makedirs(savePath + "/relighted_frames", exist_ok=True)
+            os.makedirs(savePath + "/original_frames", exist_ok=True)
+        elif texture:    
+            os.makedirs(savePath + "/retextured_frames", exist_ok=True)
             os.makedirs(savePath + "/original_frames", exist_ok=True)
         else:
-            os.makedirs(savePath + "/recons", exist_ok=True)
+            os.makedirs(savePath + "/erp_recons", exist_ok=True)
             os.makedirs(savePath + "/depth_maps", exist_ok=True)
             os.makedirs(savePath + "/basis_imgs", exist_ok=True)
             os.makedirs(savePath + "/view_dep_imgs", exist_ok=True)
             os.makedirs(savePath + "/diffuse_imgs", exist_ok=True)
     else:
-        os.makedirs(savePath + "/recons", exist_ok=True)
+        os.makedirs(savePath + "/erp_recons", exist_ok=True)
         os.makedirs(savePath + "/depth_maps", exist_ok=True)
 
     try:
@@ -340,7 +398,7 @@ def evaluation(
     img_eval_interval = 1 if N_vis < 0 else max(test_dataset.all_rays.shape[0] // N_vis, 1)  # 1
     idxs = list(range(0, test_dataset.all_rays.shape[0], img_eval_interval)) # [0, 1, 2, ..., N_frame-1]
 
-    if use_palette and edit:
+    if use_palette and recolor:
         original_palette = model.basis_color.clone().clamp(0., 1.)  # [num_basis, 3]
         print("original_palette:\n", original_palette)
         palette_file_path = os.path.join(savePath, f'palette.pth')
@@ -401,8 +459,18 @@ def evaluation(
             final_rgb_map = output_dict['final_rgbs']     # (M, 3)
             basis_rgb_map = output_dict['basis_rgbs']     # (M, num_basis*3)
 
-            if save or edit:
+            if mask:
+                omega_map = output_dict['basis_acc']          # (M, num_basis)
+
+            if save or recolor or lighting:
                 soft_color_map = output_dict['soft_colors']   # (M, num_basis*3)
+                final_color_map= output_dict['final_colors']    # (M, num_basis*3)
+                omega_map = output_dict['basis_acc']          # (M, num_basis)
+                radiance_map = output_dict['radiance_maps']   # (M, 1)
+            
+            if texture:
+                soft_color_map = output_dict['soft_colors']   # (M, num_basis*3)
+                scaled_color_map = output_dict['scaled_colors'] # (M, num_basis*3)
                 final_color_map= output_dict['final_colors']    # (M, num_basis*3)
                 omega_map = output_dict['basis_acc']          # (M, num_basis)
                 radiance_map = output_dict['radiance_maps']   # (M, 1)
@@ -422,10 +490,19 @@ def evaluation(
                     basis_img = torch.from_numpy(basis_rgb_map[..., i*3:(i+1)*3].reshape(H, W, 3))
                     pred_basis_img.append(basis_img)
                 pred_basis_img = torch.cat(pred_basis_img, dim=1).clip(0., 1.)
-
-                if save or edit:
+                
+                if mask:
+                    omega_map = torch.from_numpy(omega_map)             # [M, num_basis]
+                
+                if save or recolor or lighting:
                     soft_color_map = torch.from_numpy(soft_color_map)   # [M, num_basis*3]
-                    pred_basis_img = torch.cat(pred_basis_img, dim=1).clip(0., 1.)
+                    final_color_map = torch.from_numpy(final_color_map) # [M, num_basis*3]
+                    radiance_map = torch.from_numpy(radiance_map)       # [M, 1]
+                    omega_map = torch.from_numpy(omega_map)             # [M, num_basis]
+                
+                if texture:
+                    soft_color_map = torch.from_numpy(soft_color_map)   # [M, num_basis*3]
+                    scaled_color_map = torch.from_numpy(scaled_color_map) # [M, num_basis*3]
                     final_color_map = torch.from_numpy(final_color_map) # [M, num_basis*3]
                     radiance_map = torch.from_numpy(radiance_map)       # [M, 1]
                     omega_map = torch.from_numpy(omega_map)             # [M, num_basis]
@@ -448,53 +525,84 @@ def evaluation(
                     pred_basis_img.append(basis_img)
                 pred_basis_img = torch.cat(pred_basis_img, dim=1).clip(0., 1.)
 
-                if save or edit:
+                if mask:
+                    omega_map = omega_map.cpu()
+
+                if save or recolor or lighting:
                     soft_color_map = soft_color_map.cpu()
                     final_color_map = final_color_map.cpu()
                     radiance_map= radiance_map.cpu()
                     omega_map = omega_map.cpu()  
+                
+                if texture:
+                    soft_color_map = soft_color_map.cpu()
+                    scaled_color_map = scaled_color_map.cpu()
+                    final_color_map = final_color_map.cpu()
+                    radiance_map = radiance_map.cpu()
+                    omega_map = omega_map.cpu()
         
-        if use_palette and save:
-            soft_color_map = soft_color_map.view(-1, 3) # [M * num_basis, 3]
-            soft_color_hsv = rgb_to_hsv(soft_color_map)      # [M * num_basis, 3]
+        if use_palette and not mask:
+            if save:
+                soft_color_map = soft_color_map.view(-1, 3) # [M * num_basis, 3]
+                soft_color_hsv = rgb_to_hsv(soft_color_map)      # [M * num_basis, 3]
 
-            output = {
-                "soft_color": soft_color_map,          # [M * num_basis, 3]
-                "radiance": radiance_map,              # [M, 1]
-                "omega": omega_map,                    # [M, 4]
-                "soft_color_hsv": soft_color_hsv,      # [M * num_basis, 3]
-                "view_dep_color": view_dep_color_map   # [M, 3]
-            }
-        
-        if use_palette and edit:
-            file_path = os.path.join(savePath, 'out_dict', f'{(idx+1):03d}.pth')
-            out_dict = torch.load(file_path)  # 'soft_color', 'radiance', 'omega', 'soft_color_hsv', 'view_dep_color'
-            
-            # soft_color_map = soft_color_map.view(-1, 3) # [M * num_basis, 3]
-            # soft_color_hsv = rgb_to_hsv(soft_color_map) # [M * num_basis, 3]
-            soft_color_map = out_dict['soft_color']
-            soft_color_hsv = out_dict['soft_color_hsv']
-            # radiance_map = out_dict['radiance']
-            # omega_map = out_dict['omega']
-            view_dep_color_map = out_dict['view_dep_color']
+                output = {
+                    "soft_color": soft_color_map,          # [M * num_basis, 3]
+                    "radiance": radiance_map,              # [M, 1]
+                    "omega": omega_map,                    # [M, 4]
+                    "soft_color_hsv": soft_color_hsv,      # [M * num_basis, 3]
+                    "view_dep_color": rgb_map              # [M, 3]
+                }
+            else:
+                # if use the saved information
+                # file_path = os.path.join(savePath, 'out_dict', f'{(idx+1):03d}.pth')
+                # out_dict = torch.load(file_path)  # 'soft_color', 'radiance', 'omega', 'soft_color_hsv', 'view_dep_color'
+                # soft_color_map = out_dict['soft_color']
+                # soft_color_hsv = out_dict['soft_color_hsv']
+                # radiance_map = out_dict['radiance']
+                # omega_map = out_dict['omega']
+                # view_dep_color_map = out_dict['view_dep_color']
 
-            edited_soft_color = apply_palette_changes(M, num_basis, soft_color_hsv, h_diff, s_scale, v_scale)
+                soft_color_map = soft_color_map.view(-1, 3) # [M * num_basis, 3]
+                soft_color_hsv = rgb_to_hsv(soft_color_map) # [M * num_basis, 3]
+                
+                original_rgb = compose_palette_bases(M, num_basis, 
+                                                     rgb_map, 
+                                                     soft_color_map, 
+                                                     radiance_map, 
+                                                     omega_map)
+                original_rgb_map = original_rgb.reshape(H, W, 3).clip(0., 1.)
 
-            original_rgb = compose_palette_bases(M, num_basis, 
-                                                 rgb_map, 
-                                                 soft_color_map, 
-                                                 radiance_map, 
-                                                 omega_map)
-            original_rgb_map = original_rgb.reshape(H, W, 3).clip(0., 1.)
-            edited_rgb = compose_palette_bases(M, num_basis, 
-                                               rgb_map, 
-                                               edited_soft_color, 
-                                               radiance_map, 
-                                               omega_map)
-            edited_rgb_map = edited_rgb.reshape(H, W, 3).clip(0., 1.)
+                if recolor:
+                    edited_soft_color = apply_palette_changes(M, num_basis, soft_color_hsv, h_diff, s_scale, v_scale)
+                    edited_rgb = compose_palette_bases(M, num_basis, 
+                                                       rgb_map, 
+                                                       edited_soft_color, 
+                                                       radiance_map, 
+                                                       omega_map)
+                
+                elif lighting:
+                    view_dep_scale = 3   # default: 1, options: 0, 3, 6
+                    edited_rgb = compose_palette_bases(M, num_basis, 
+                                                       rgb_map * view_dep_scale, 
+                                                       soft_color_map, 
+                                                       radiance_map, 
+                                                       omega_map)
+                
+                elif texture:
+                    scaled_color_map = scaled_color_map.view(-1, 3) # [M * num_basis, 3]
+                    edited_rgb = compose_palette_bases(M, num_basis,
+                                                       rgb_map,
+                                                       scaled_color_map,
+                                                       radiance_map,
+                                                       omega_map)
+                else:
+                    print("There is no edit option selected.")
+                    edited_rgb = torch.zeros(H, W, 3)
+                
+                edited_rgb_map = edited_rgb.reshape(H, W, 3).clip(0., 1.)
 
-        
-        if not save or not edit:
+        if test:
             if len(test_dataset.all_rgbs):
                 gt_rgb = test_dataset.all_rgbs[idxs[idx]].view(H, W, 3)
                 if use_palette:
@@ -518,11 +626,18 @@ def evaluation(
                     l_vgg.append(l_v)
 
         # Convert results to numpy 'uint8' for visualize into images
-        if not save:
+        if not save and not test:
             if use_palette:
-                if edit:
+                if recolor or lighting or texture:
                     original_rgb_map = (original_rgb_map.numpy() * 255).astype('uint8')
                     edited_rgb_map = (edited_rgb_map.numpy() * 255).astype('uint8')
+                elif mask:
+                    palette = model.basis_color.clone().clamp(0., 1.)  # [num_basis, 3]
+                    # soft segmentation
+                    visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
+                    # filtered hard segmentation
+                    visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=False, 
+                                           threshold=0.5, target_indices=[3], bg_color=[0.9, 0.9, 0.9])
                 else:
                     rgb_map = (rgb_map.numpy() * 255).astype('uint8')
                     depth_map, _ = visualize_depth_numpy(depth_map.numpy(), near_far)
@@ -536,16 +651,23 @@ def evaluation(
                     bg_map = (bg_map.numpy() * 255).astype('uint8')
                     if idx == 0:
                         env_map = (env_map.numpy() * 255).astype('uint8')
-
         
-        if savePath is not None:
+        if savePath is not None and not test:
             if use_palette:
                 if save:
                     file_path = os.path.join(savePath, 'out_dict', f'{(idx+1):03d}.pth')
                     torch.save(output, file_path)
-                elif edit:
-                    imageio.imwrite(f'{savePath}/edited_frames/{prtx}{(idx+1):03d}.png', edited_rgb_map)
+                elif recolor:
+                    imageio.imwrite(f'{savePath}/recolored_frames/{prtx}{(idx+1):03d}.png', edited_rgb_map)
                     imageio.imwrite(f'{savePath}/original_frames/{prtx}{(idx+1):03d}.png', original_rgb_map)
+                elif lighting:
+                    imageio.imwrite(f'{savePath}/relighted_frames/{prtx}{(idx+1):03d}.png', edited_rgb_map)
+                    imageio.imwrite(f'{savePath}/original_frames/{prtx}{(idx+1):03d}.png', original_rgb_map)
+                elif texture:
+                    imageio.imwrite(f'{savePath}/retextured_frames/{prtx}{(idx+1):03d}.png', edited_rgb_map)
+                    imageio.imwrite(f'{savePath}/original_frames/{prtx}{(idx+1):03d}.png', original_rgb_map)
+                elif mask:
+                    print("Segmentation maps are saved.")
                 else:
                     imageio.imwrite(f'{savePath}/diffuse_imgs/{prtx}{(idx+1):03d}.png', diffuse_rgb_map)
                     imageio.imwrite(f'{savePath}/view_dep_imgs/{prtx}{(idx+1):03d}.png', rgb_map)
@@ -554,7 +676,7 @@ def evaluation(
                     imageio.imwrite(f'{savePath}/depth_maps/{prtx}{(idx+1):03d}.png', depth_map)
  
             else:
-                imageio.imwrite(f'{savePath}/recons/{prtx}{(idx+1):03d}.png', rgb_map)
+                imageio.imwrite(f'{savePath}/erp_recons/{prtx}{(idx+1):03d}.png', rgb_map)
                 imageio.imwrite(f'{savePath}/depth_maps/{prtx}{(idx+1):03d}.png', depth_map)
                 if env_map is not None:
                     os.makedirs(savePath + "/envmaps", exist_ok=True)
@@ -565,7 +687,7 @@ def evaluation(
     gc.collect()
     torch.cuda.empty_cache()
 
-    if not save or not edit:
+    if test:
         if PSNRs:
             psnr = np.mean(np.asarray(PSNRs))
             if compute_extra_metrics:
@@ -615,10 +737,9 @@ def palette_extract(
     except Exception:
         pass
 
-    near_far = test_dataset.near_far  # [0.1, 300.0]
     img_eval_interval = 1 if N_vis < 0 else max(test_dataset.all_rays.shape[0] // N_vis, 1)  # 1
 
-    for idx, (samples, sample_times, sample_rgbs) in enumerate(tqdm(zip(test_dataset.all_rays[0::img_eval_interval], 
+    for _, (samples, sample_times, sample_rgbs) in enumerate(tqdm(zip(test_dataset.all_rays[0::img_eval_interval], 
                                                                         test_dataset.all_times[0::img_eval_interval],
                                                                         test_dataset.all_rgbs[0::img_eval_interval]), 
                                                                     file=sys.stdout)):
