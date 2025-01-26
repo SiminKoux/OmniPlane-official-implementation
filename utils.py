@@ -7,13 +7,151 @@ import numpy as np
 from PIL import Image
 import scipy.signal
 import plyfile
+import random
 import skimage.measure
 import matplotlib.pyplot as plt
 from scipy.spatial.transform import Slerp
 from scipy.spatial.transform import Rotation as R
 
+from palette.backend import _backend
+from palette.rgbsg import *
+
 mse2psnr = lambda x : -10. * torch.log(x) / torch.log(torch.Tensor([10.]))
 
+
+def srgb_to_linear(x):
+    return torch.where(x < 0.04045, x / 12.92, ((x + 0.055) / 1.055) ** 2.4)
+
+def compute_RGB_histogram(colors_rgb: np.ndarray,
+                          weights: np.ndarray,
+                          bits_per_channel: int):
+    assert colors_rgb.ndim == 2 and colors_rgb.shape[1] == 3
+    assert weights.ndim == 1
+    assert len(colors_rgb) == len(weights)
+    assert 1 <= bits_per_channel and bits_per_channel <=8
+
+    try:
+        bin_weights, bin_centers_rgb = _backend.compute_RGB_histogram(
+            colors_rgb.flatten(), weights.flatten(), bits_per_channel)
+    except RuntimeError as err:
+        print(err)
+        assert False
+
+    return bin_weights, bin_centers_rgb
+
+def run_kmeans(n_clusters: int,
+               points: np.ndarray,
+               init: np.ndarray,
+               sample_weight: np.ndarray):
+    print(f'running kmeans with K = {n_clusters}')
+    kmeans = KMeans(n_clusters=n_clusters, init=init).fit(X=points, sample_weight=sample_weight)
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+
+    center_weights = np.zeros(n_clusters)
+    for i in range(n_clusters):
+        center_weights[i] = np.sum(sample_weight[labels==i])
+
+    idcs = np.argsort(center_weights * -1)
+    return centers[idcs], center_weights[idcs]
+
+def palette_extraction(inputs: dict, 
+                       output_dir: str, 
+                       H: int,
+                       W: int,
+                       tau: float = 8e-3,
+                       palette_size = None,
+                       normalize_input = False,
+                       error_thres = 5.0 / 255.0):
+    """
+        Extract palettes with the RGBXY method
+        Convex hull should have at least 4 vertices
+    """
+    assert palette_size is None or palette_size >=4
+    print(f'extracting palette with {palette_size} colors')
+    
+    output_prefix = "%s/extract"%output_dir
+    # if not os.path.exists(output_prefix):
+    #     print(f'create output directionary {output_prefix}')
+    #     os.makedirs(output_prefix)
+
+    # Radiance Sampling
+    colors = inputs['colors']
+    weights = np.ones_like(colors[..., 0])
+    colors = colors.reshape(-1, 3)
+    weights = weights.flatten()
+
+    assert len(weights[weights < 0]) == 0, 'negative weight indicates the failure of radiance sampling'
+    
+    # Save Radiance Samples (outside timig analysis)
+    n_total = H * W
+    random.seed(0)
+    idcs = random.sample(range(len(colors)), n_total)
+    assert len(idcs) == len(set(idcs)), 'each element if idcs should be unique'
+    img = colors[idcs].reshape(H, W, 3)
+    Image.fromarray((img*255).round().clip(0, 255).astype(np.uint8)).save(output_prefix + "-radiance-raw.png")
+
+    # Radiance Sample Filtering
+    # Coarse Histogram (2^3 = 8 bins)
+    bin_weights_coarse, bin_centers_coarse = compute_RGB_histogram(colors, weights, bits_per_channel = 3)
+    sum_weights = np.sum(bin_weights_coarse)
+    bin_weights_coarse /= sum_weights
+    idcs = bin_weights_coarse > tau
+    bin_weights_coarse = bin_weights_coarse[idcs]
+    bin_centers_coarse = bin_centers_coarse[idcs]
+
+    # Fine Histogram (2^5 = 32 bins)
+    bin_weights_fine, bin_centers_fine = compute_RGB_histogram(colors, weights, bits_per_channel=5)
+    idcs = bin_weights_fine > 0
+    bin_weights_fine = bin_weights_fine[idcs]
+    bin_weights_fine /= sum_weights
+    bin_centers_fine = bin_centers_fine[idcs]
+
+    centers, center_weights = run_kmeans(
+        n_clusters=len(bin_weights_coarse), points=bin_centers_fine,
+        init=bin_centers_coarse, sample_weight=bin_weights_fine)
+
+    # Convex Hull Simplification
+    palette_rgb = Hull_Simplification_posternerf(
+        centers.astype(np.double), output_prefix,
+        pixel_counts=center_weights,
+        error_thres=error_thres,
+        target_size=palette_size)
+    _, hist_rgb = compute_RGB_histogram(colors, weights, bits_per_channel=5)
+    
+    if normalize_input:
+        hist_rgb = hist_rgb + 0.05
+        hist_rgb_norm = np.linalg.norm(hist_rgb, axis=-1, keepdims=True) #.clip(min=0.1)
+        hist_rgb = hist_rgb / hist_rgb_norm
+
+    # Generate weight
+    hist_weights = Tan18.Get_ASAP_weights_using_Tan_2016_triangulation_and_then_barycentric_coordinates(hist_rgb.astype(np.double).reshape((-1,1,3)), 
+                        palette_rgb, None, order=0) # N_bin_center x 1 x num_palette
+    hist_weights = hist_weights.reshape([32,32,32,palette_rgb.shape[0]])
+    
+    # Save Palette
+    palette_img = get_bigger_palette_to_show(palette_rgb)
+    Image.fromarray((palette_img * 255).round().clip(0, 255).astype(np.uint8)).save(output_prefix+"-palette.png")
+
+    write_palette_txt(palette_rgb, output_prefix+'-palette.txt')
+    np.savez(os.path.join(output_dir, 'palette.npz'), palette=palette_rgb)
+    np.savez(os.path.join(output_dir, 'hist_weights.npz'), hist_weights=hist_weights)
+
+def get_valid(rays, rgbs, depths, weights):
+    rays_o = rays[:, :3]
+    rays_d = rays[:, 3:]
+    positions = rays_o + rays_d * depths[..., None]
+
+    rgbs_norm = rgbs + 0.05
+    rgbs_norm = rgbs_norm / rgbs_norm.norm(dim=-1, p=2, keepdim=True)
+    
+    valid = (weights > 5e-1) # (1226830,)
+    rgbs = rgbs[valid]
+    rgbs_norm = rgbs_norm[valid]
+    depths = depths[valid]
+    positions = positions[valid]
+
+    return rgbs_norm, positions
 
 def extract_euler(rotation_matrix):
     ''' Extract Euler Angles (Roll, Pitch, Yaw) from rotation matrices '''
