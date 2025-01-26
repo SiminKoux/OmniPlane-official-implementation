@@ -377,9 +377,14 @@ def evaluation(
             palette = model.basis_color.clone()
             num_basis = palette.shape[0]
 
-        output_dict = renderer(rays, times, model, chunk=4096, 
-                               n_coarse=n_coarse, n_fine=n_fine,
-                               exp_sampling=exp_sampling, device=device, 
+        output_dict = renderer(rays=rays, 
+                               times=times, 
+                               model=model, 
+                               chunk=4096, 
+                               n_coarse=n_coarse, 
+                               n_fine=n_fine,
+                               exp_sampling=exp_sampling, 
+                               device=device, 
                                empty_gpu_cache=empty_gpu_cache, 
                                resampling=resampling, 
                                use_coarse_sample=use_coarse_sample, 
@@ -639,11 +644,16 @@ def render_for_stabilizer(
         rays = samples.view(-1, samples.shape[-1])
         times = sample_times.view(-1, sample_times.shape[-1])
 
-        rgb_map, depth_map, bg_map, env_map, _ = renderer(
+        output_dict = renderer(
             rays, times, model, chunk=4096, n_coarse=n_coarse, n_fine=n_fine, exp_sampling=exp_sampling, 
             device=device, empty_gpu_cache=empty_gpu_cache, resampling=resampling,
             use_coarse_sample=use_coarse_sample, interval_th=interval_th)
         
+        rgb_map = output_dict['rgb_maps']     # (M, 3)
+        depth_map = output_dict['depth_maps'] # (M, )
+        bg_map = output_dict['bg_maps']       # (M, 3)
+        env_map = output_dict['env_maps']     # (M, 3)
+
         if empty_gpu_cache:
             rgb_map = rgb_map.clip(0., 1.)  
             rgb_map = torch.from_numpy(rgb_map.reshape(H, W, 3))
