@@ -550,25 +550,12 @@ def evaluation(
                     imageio.imwrite(f'{savePath}/diffuse_imgs/{prtx}{(idx+1):03d}.png', diffuse_rgb_map)
                     imageio.imwrite(f'{savePath}/view_dep_imgs/{prtx}{(idx+1):03d}.png', rgb_map)
                     imageio.imwrite(f'{savePath}/recons/{prtx}{(idx+1):03d}.png', final_rgb_map)
-                    # # Load the checkerboard image
-                    # checkerboard_img = imageio.imread('./data/extended_checkboard.jpg')
-                    # # Resize the checkerboard to match your image dimensions if necessary
-                    # checkerboard_img_resized = cv2.resize(checkerboard_img, (pred_basis_img.shape[1], pred_basis_img.shape[0]), interpolation=cv2.INTER_AREA)
-                    # # Create a mask where the pixel RGB values are [0, 0, 0] (black) in your image
-                    # mask = np.all(pred_basis_img < 10, axis=-1)
-                    # # Use the mask to replace black pixels in your image with the checkerboard pattern
-                    # output_image = np.where(mask[:, :, None], checkerboard_img_resized, pred_basis_img)
                     imageio.imwrite(f'{savePath}/basis_imgs/{prtx}{(idx+1):03d}.png', pred_basis_img)
-                    # imageio.imwrite(f'{savePath}/basis_imgs/{prtx}{(idx+1):03d}.png', output_image)
                     imageio.imwrite(f'{savePath}/depth_maps/{prtx}{(idx+1):03d}.png', depth_map)
-                    # rgb_map = np.concatenate((rgb_map, depth_map), axis=1)
-                    # imageio.imwrite(f'{savePath}/rgbd/{prtx}{(idx+1):03d}.png', rgb_map)
  
             else:
                 imageio.imwrite(f'{savePath}/recons/{prtx}{(idx+1):03d}.png', rgb_map)
                 imageio.imwrite(f'{savePath}/depth_maps/{prtx}{(idx+1):03d}.png', depth_map)
-                # rgb_map = np.concatenate((rgb_map, depth_map), axis=1)
-                # imageio.imwrite(f'{savePath}/rgbd/{prtx}{(idx+1):03d}.png', rgb_map)
                 if env_map is not None:
                     os.makedirs(savePath + "/envmaps", exist_ok=True)
                     os.makedirs(savePath + "/bgs", exist_ok=True)
@@ -597,6 +584,81 @@ def evaluation(
                 print(f"PSNR: {psnr}")
         model.train()
     return PSNRs
+
+
+@torch.no_grad()
+def palette_extract(
+        test_dataset,
+        model,
+        renderer, 
+        savePath=None, 
+        N_vis=5,
+        n_coarse=-1, 
+        n_fine=0,
+        exp_sampling=False, 
+        device='cuda',
+        empty_gpu_cache=False,
+        resampling=False, 
+        use_coarse_sample=True, 
+        interval_th=False):
+    """
+    Evaluate the model on the test rays and compute metrics.
+    """
+    model.eval()
+    all_valid_rgbs_norm = []
+    all_valid_positions = [] 
+    
+    os.makedirs(savePath, exist_ok=True)
+
+    try:
+        tqdm._instances.clear()
+    except Exception:
+        pass
+
+    near_far = test_dataset.near_far  # [0.1, 300.0]
+    img_eval_interval = 1 if N_vis < 0 else max(test_dataset.all_rays.shape[0] // N_vis, 1)  # 1
+
+    for idx, (samples, sample_times, sample_rgbs) in enumerate(tqdm(zip(test_dataset.all_rays[0::img_eval_interval], 
+                                                                        test_dataset.all_times[0::img_eval_interval],
+                                                                        test_dataset.all_rgbs[0::img_eval_interval]), 
+                                                                    file=sys.stdout)):
+        W, H = test_dataset.img_wh
+        rays = samples.view(-1, samples.shape[-1])
+        times = sample_times.view(-1, sample_times.shape[-1])
+        rgbs = sample_rgbs.view(-1, sample_rgbs.shape[-1])
+
+        output_dict = renderer(
+            rays=rays, 
+            times=times, 
+            model=model, 
+            chunk=4096, 
+            n_coarse=n_coarse, 
+            n_fine=n_fine, 
+            exp_sampling=exp_sampling, 
+            device=device, 
+            empty_gpu_cache=empty_gpu_cache, 
+            resampling=resampling,
+            use_coarse_sample=use_coarse_sample, 
+            interval_th=interval_th)
+
+        depth_rendered = output_dict['depth_maps'] # (M, )
+        acc_map = output_dict['acc_maps']          # (M, )
+
+        rgbs_norm, valid_positions = get_valid(rays, rgbs, depth_rendered, acc_map)
+        all_valid_rgbs_norm.append(rgbs_norm)
+        all_valid_positions.append(valid_positions)
+
+    colors_norm = torch.cat(all_valid_rgbs_norm, dim=0).detach().cpu().numpy()
+    positions = torch.cat(all_valid_positions, dim=0).detach().cpu().numpy()
+    palette_extraction_input = {"colors": colors_norm, "positions": positions}
+
+    palette_path = os.path.join(savePath, "palette")
+    os.makedirs(palette_path, exist_ok=True)
+
+    palette_extraction(palette_extraction_input, 
+                       palette_path, H, W,
+                       normalize_input = True,
+                       error_thres = 5.0 / 255.0)
 
 
 @torch.no_grad()
