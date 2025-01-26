@@ -10,6 +10,12 @@ python main.py --config configs/omni/lab/default.txt
 # please let the 'common_werp_recon_indoor.txt' renamed into 'common.txt' 
 python main.py --config configs/omni/lab/default.txt --evaluation 1
 
+# Extract initialized palette based on the stage 1's model
+# change the corresponding .txt name
+# For example, if train for indoor scene 'Lab' in werp grids, 
+# please let the 'common_werp_recon_indoor.txt' renamed into 'common.txt' 
+python main.py --config configs/omni/lab/default.txt --palette_extract 1
+
 # Stabilization based on the stage 1's model 
 # change the corresponding .txt name
 # For example, if train for indoor scene 'Lab' in werp grids, 
