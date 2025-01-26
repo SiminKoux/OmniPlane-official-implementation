@@ -59,6 +59,8 @@ def config_parser(default_files=None):
                         help='render and evaluate test set')
     parser.add_argument("--stabilize", type=int, default=0,   # set '1' means only stabilize
                         help='render and evaluate test set')
+    parser.add_argument("--palette_extract", type=int, default=0,   # set '1' means only stabilize
+                        help='render and evaluate test set')
     parser.add_argument("--metric_only", type=int, default=0,  # set '1' means only metric
                         help='evaluate metrics in test set from existing rendered images')
     
