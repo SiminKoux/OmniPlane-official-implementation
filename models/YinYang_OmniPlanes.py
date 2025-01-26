@@ -855,9 +855,7 @@ class YinYang_OmniPlanes(TensorBase):
     def forward(self, 
                 rays_chunk: torch.Tensor, 
                 frame_time: torch.Tensor,
-                white_bg: bool = True, 
-                is_train: bool = False, 
-                ndc_ray: bool = False, 
+                is_train: bool = False,
                 n_coarse: int = -1, 
                 n_fine: int = 0,
                 exp_sampling: bool = False, 
@@ -871,9 +869,7 @@ class YinYang_OmniPlanes(TensorBase):
         Args:
             rays_chunk: [Batch_size, 6] tensor, rays [rays_0, rays_d]
             frame_time: [Batch_size, 1] tensor, time value
-            white_bg: bool, whether to use white background
             is_train: bool, whether in training mode
-            ndc_ray: bool, whether to use normalized device coordinates
             n_coarse: int, number of coarse samples along each ray
             n_fine: int, number of fine samples along each ray
             exp_sampling: bool, whether use expotential sampling
@@ -898,22 +894,19 @@ class YinYang_OmniPlanes(TensorBase):
             return env_map
 
         # 1) Sample coarse ray points (N_rays, n_coarse, 3)
-        if ndc_ray:
-            raise NotImplementedError
+        if exp_sampling:
+            coarse_xyz_sampled, coarse_z_vals, _ = self.sample_ray_exp(
+                rays_chunk[:, :3], viewdirs, is_train=is_train, N_samples=n_coarse
+            ) # the third is 'ray_valid'.
         else:
-            if exp_sampling:
-                coarse_xyz_sampled, coarse_z_vals, _ = self.sample_ray_exp(
-                    rays_chunk[:, :3], viewdirs, is_train=is_train, N_samples=n_coarse
-                ) # the third is 'ray_valid'.
-            else:
-                coarse_xyz_sampled, coarse_z_vals, _ = self.sample_ray(
-                    rays_chunk[:, :3], viewdirs, is_train=is_train, N_samples=n_coarse
-                )
-            # dists = torch.cat((z_vals[:, 1:] - z_vals[:, :-1], torch.zeros_like(z_vals[:, :1])), dim=-1)
-            if not is_train:
-                coarse_z_vals = coarse_z_vals[0].repeat(coarse_xyz_sampled.shape[0], 1)
-            coarse_dists = coarse_z_vals[..., 1:] - coarse_z_vals[..., :-1]
-            coarse_dists = torch.cat((coarse_dists, coarse_dists[..., -1:]), dim=-1)  # (B, N)
+            coarse_xyz_sampled, coarse_z_vals, _ = self.sample_ray(
+                rays_chunk[:, :3], viewdirs, is_train=is_train, N_samples=n_coarse
+            )
+        # dists = torch.cat((z_vals[:, 1:] - z_vals[:, :-1], torch.zeros_like(z_vals[:, :1])), dim=-1)
+        if not is_train:
+            coarse_z_vals = coarse_z_vals[0].repeat(coarse_xyz_sampled.shape[0], 1)
+        coarse_dists = coarse_z_vals[..., 1:] - coarse_z_vals[..., :-1]
+        coarse_dists = torch.cat((coarse_dists, coarse_dists[..., -1:]), dim=-1)  # (B, N)
 
         # Get the normalized Yinyang coordiantes for coarse ray points
         coarse_coords_sampled = self.coordinates.from_cartesian(coarse_xyz_sampled)
@@ -1004,9 +997,6 @@ class YinYang_OmniPlanes(TensorBase):
 
         acc_map = torch.sum(weight, -1)  # [4096]
         rgb_map = torch.sum(weight[..., None] * rgb, -2)  # [4096, 3]
-
-        # if white_bg or (is_train and torch.rand((1,))<0.5):
-        #     rgb_map = rgb_map + (1. - acc_map[..., None])
         bg_map = None
         env_map = None
         if self.envmap is not None:
