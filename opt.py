@@ -61,6 +61,10 @@ def config_parser(default_files=None):
                         help='render and evaluate test set')
     parser.add_argument("--palette_extract", type=int, default=0,   # set '1' means only stabilize
                         help='render and evaluate test set')
+    parser.add_argument("--palette_train", type=int, default=0,   # set '1' means only stabilize
+                        help='render and evaluate test set')
+    parser.add_argument("--palette_edit", type=int, default=0,   # set '1' means only stabilize
+                        help='render and evaluate test set')
     parser.add_argument("--metric_only", type=int, default=0,  # set '1' means only metric
                         help='evaluate metrics in test set from existing rendered images')
     
@@ -281,7 +285,11 @@ def config_parser(default_files=None):
     parser.add_argument('--color_space', type=str, default='srgb', choices=['srgb', 'linear'], 
                         help="Color space, supports (linear, srgb)") 
     parser.add_argument("--use_palette", default=False, action="store_true")
-    
+    parser.add_argument("--recolor", default=False, action="store_true")
+    parser.add_argument("--relighting", default=False, action="store_true")
+    parser.add_argument("--retexture", default=False, action="store_true")
+    parser.add_argument("--visualize_seg", default=False, action="store_true")
+    parser.add_argument("--save_edit_dict", default=False, action="store_true")
     
     # Logging/Saving Options
     parser.add_argument("--N_vis", type=int, default=-1, help='N images to vis')
