@@ -377,17 +377,28 @@ def train(args):
             depth_train = alldepths[ray_idx].to(device).squeeze()
             depth_nonezero_mask = depth_train != 0
 
-        rgb_map, depth_map, _, _, alpha = renderer(
-            rays_train, frame_time, 
-            model, chunk=args.batch_size, 
-            n_coarse=n_coarse, n_fine=n_fine, 
-            white_bg=white_bg, ndc_ray=False, device=device, is_train=True,
-            exp_sampling=args.exp_sampling, 
+        output_dict = renderer(
+            rays=rays_train, 
+            times=frame_time, 
+            model=model, 
+            chunk=args.batch_size, 
+            n_coarse=n_coarse, 
+            n_fine=n_fine, 
+            is_train=True,
+            exp_sampling=args.exp_sampling,
+            device=device, 
+            empty_gpu_cache=False,
+            pretrain_envmap=False,
             pivotal_sample_th=args.pivotal_sample_th,
             resampling=(args.resampling and iteration > args.iter_ignore_resampling), 
             use_coarse_sample=use_coarse_sample,
+            use_palette=False,
             interval_th=args.interval_th
         )  # rgb_map: [4096, 3], depth_map: [4096], alpha: [4096, 257]
+
+        rgb_map = output_dict['rgb_maps']
+        depth_map = output_dict['depth_maps']
+        alpha = output_dict['alphas']
 
         # Reconstruction/Photometric Loss (MSE) - equation (13)
         recon_loss = torch.mean((rgb_map - rgb_train) ** 2)
@@ -473,10 +484,21 @@ def train(args):
         # if iteration % args.vis_every == args.vis_every - 1 and args.N_vis!=0:
         if (iteration + 1) in vis_list and args.N_vis != 0:
             PSNRs_test = evaluation(
-                test_dataset, model, args, renderer, f'{logfolder}/imgs_vis/', N_vis=args.N_vis,
-                prtx=f'{(iteration + 1):06d}_', n_coarse=n_coarse, n_fine=n_fine, white_bg=white_bg, ndc_ray=False,
-                compute_extra_metrics=False, exp_sampling=args.exp_sampling, empty_gpu_cache=True,
-                resampling=(args.resampling and iteration > args.iter_ignore_resampling), use_coarse_sample=use_coarse_sample,
+                test_dataset, 
+                model, 
+                args, 
+                renderer, 
+                savePath=f'{logfolder}/imgs_vis/', 
+                N_vis=args.N_vis,
+                prtx=f'{(iteration + 1):06d}_', 
+                n_coarse=n_coarse, 
+                n_fine=n_fine,
+                compute_extra_metrics=False, 
+                exp_sampling=args.exp_sampling, 
+                empty_gpu_cache=True,
+                resampling=(args.resampling and iteration > args.iter_ignore_resampling), 
+                use_coarse_sample=use_coarse_sample,
+                use_palette=False,
                 interval_th=args.interval_th
             )
             summary_writer.add_scalar('test/psnr', np.mean(PSNRs_test), global_step=iteration)
