@@ -68,6 +68,29 @@ python main.py --config configs/omni/specific_instance/default.txt
 # For example
 python main.py --config configs/omni/lab/default.txt
 ```
+if you would like to avoid evaluation in the training process, you could comment out the following lines in the ``train" function：
+```
+if (iteration + 1) in vis_list and args.N_vis != 0:
+            PSNRs_test = evaluation(
+                test_dataset, 
+                model, 
+                args, 
+                renderer, 
+                savePath=f'{logfolder}/imgs_vis/', 
+                N_vis=args.N_vis,
+                prtx=f'{(iteration + 1):06d}_', 
+                n_coarse=n_coarse, 
+                n_fine=n_fine,
+                compute_extra_metrics=False, 
+                exp_sampling=args.exp_sampling, 
+                empty_gpu_cache=True,
+                resampling=(args.resampling and iteration > args.iter_ignore_resampling), 
+                use_coarse_sample=use_coarse_sample,
+                use_palette=False,
+                interval_th=args.interval_th
+            )
+            summary_writer.add_scalar('test/psnr', np.mean(PSNRs_test), global_step=iteration)
+```
 
 To train color decompostion based on learned OmniPlanes on individual scenes, run the script below.
 ```bash
