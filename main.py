@@ -36,7 +36,6 @@ def render_test(args):
         "skip": 1,
     }
     test_dataset = dataset(**load_params)
-    white_bg = test_dataset.white_bg
 
     if args.ckpt is None:
         ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}.th')
@@ -71,8 +70,6 @@ def render_test(args):
         N_vis=-1, 
         n_coarse=args.n_coarse, 
         n_fine=args.n_fine,
-        white_bg=white_bg, 
-        ndc_ray=False, 
         device=device, 
         exp_sampling=args.exp_sampling, 
         compute_extra_metrics=True,
@@ -222,8 +219,6 @@ def train(args):
     load_params["downsample"] = args.downsample_test
     load_params["skip"] = args.test_skip  # only test dataset can have non one skip value
     test_dataset = dataset(**load_params)
-
-    white_bg = train_dataset.white_bg  # False
     near_far = train_dataset.near_far  # [0.1, 300.0]
 
     # init resolution
@@ -415,8 +410,9 @@ def train(args):
                 pbar_pretrain.set_description(f'Iteration {pretrain_iter:04d}: {loss_pretrain_envmap.item()}')
 
         evaluation(
-            test_dataset, model, args, renderer, f'{logfolder}/imgs_vis/', N_vis=args.N_vis,
-            n_coarse=0, white_bg=white_bg, ndc_ray=False, compute_extra_metrics=False,
+            test_dataset, model, args, 
+            renderer, f'{logfolder}/imgs_vis/', N_vis=args.N_vis,
+            n_coarse=0, compute_extra_metrics=False,
             exp_sampling=args.exp_sampling, empty_gpu_cache=True, envmap_only=True
         )
         # reset lr rate of envmap
@@ -595,16 +591,18 @@ def train(args):
         os.makedirs(f'{logfolder}/imgs_train_all', exist_ok=True)
         train_dataset = dataset(args.datadir, split='train', downsample=args.downsample_train, is_stack=True)
         PSNRs_train = evaluation(
-            train_dataset, model, args, renderer, f'{logfolder}/imgs_train_all/', N_vis=-1, N_samples=n_coarse,
-            white_bg=white_bg, ndc_ray=False, device=device, exp_sampling=args.exp_sampling
+            train_dataset, model, args, renderer, 
+            f'{logfolder}/imgs_train_all/', N_vis=-1, N_samples=n_coarse,
+            device=device, exp_sampling=args.exp_sampling
         )
         print(f'======> {args.expname} train all psnr: {np.mean(PSNRs_train)} <========================')
 
     if args.render_test:
         os.makedirs(f'{logfolder}/imgs_test_all', exist_ok=True)
         PSNRs_test = evaluation(
-            test_dataset, model, args, renderer, f'{logfolder}/imgs_test_all/', N_vis=-1, n_coarse=n_coarse,
-            n_fine=n_fine, white_bg=white_bg, ndc_ray=False, device=device, exp_sampling=args.exp_sampling,
+            test_dataset, model, args, renderer, 
+            f'{logfolder}/imgs_test_all/', N_vis=-1, n_coarse=n_coarse,
+            n_fine=n_fine, device=device, exp_sampling=args.exp_sampling,
             empty_gpu_cache=True, resampling=args.resampling, use_coarse_sample=use_coarse_sample
         )
         summary_writer.add_scalar('test/psnr_all', np.mean(PSNRs_test), global_step=iteration)
@@ -628,13 +626,13 @@ if __name__ == '__main__':
     # print_arguments(args)
 
     if args.evaluation:
-        # run render and test
+        # run render for test/evaluation
         render_test(args)
     elif args.stabilize:
-        # run stabilizer
+        # run render for stabilization
         stabilizer(args)
     elif args.palette_extract:
-        # run palette extractor
+        # run render for palette extracting
         palette_extractor(args)
     else:
         # run train
