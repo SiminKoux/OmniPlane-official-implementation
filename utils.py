@@ -10,6 +10,7 @@ import plyfile
 import random
 import skimage.measure
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 from scipy.spatial.transform import Slerp
 from scipy.spatial.transform import Rotation as R
 
