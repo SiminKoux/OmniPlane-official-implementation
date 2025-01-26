@@ -123,7 +123,6 @@ class LLFFDataset(OmniPlanesDataset):
         super().__init__(**kwargs)
         self.define_transforms()
         self.blender2opencv = np.eye(4) # np.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-        self.white_bg = False
         self.read_meta()
 
         self.scene_bbox = self.get_scene_bbox()
@@ -215,8 +214,6 @@ class LLFFDataset(OmniPlanesDataset):
             img_t = img_t.view(3, -1).permute(1, 0)  # (h*w, 3) RGB
             self.all_rgbs += [img_t]
             rays_o, rays_d = get_rays(self.directions, c2w)  # both (h*w, 3)
-            # rays_o, rays_d = ndc_rays_blender(H, W, self.focal[0], 1.0, rays_o, rays_d)
-            # viewdir = rays_d / torch.norm(rays_d, dim=-1, keepdim=True)
 
             self.all_rays += [torch.cat([rays_o, rays_d], 1)]  # (h*w, 6)
 

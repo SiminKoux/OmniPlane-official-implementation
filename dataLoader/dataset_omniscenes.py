@@ -26,7 +26,6 @@ class OmniscenesDataset(OmniPlanesDataset):
             ])
         self.read_meta()
 
-        self.white_bg = False
         self.scene_bbox = self.get_scene_bbox()
         
         self.radius = (self.scene_bbox[1] - self.center).float().view(1, 1, 3)

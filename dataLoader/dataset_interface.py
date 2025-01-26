@@ -22,7 +22,6 @@ class OmniPlanesDataset(Dataset, ABC):
 		self.meta = None
 
 		self.indoor = True
-		self.white_bg = False
 		self.near_far = kwargs.get("near_far", [0.1, 15.0])
 		self.scene_bbox = None
 

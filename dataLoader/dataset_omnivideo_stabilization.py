@@ -21,8 +21,6 @@ class stabilize_OmniVideoDataset(OmniPlanesDataset):
         self.define_transforms()
         # Real-world dataset uses opencv's coordinate system originally
         self.blender2opencv = np.eye(4) # np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-        # disabled white background
-        self.white_bg = False
 
         # Load information from datasets
         self.read_meta()
