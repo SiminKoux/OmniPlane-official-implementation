@@ -1,6 +1,7 @@
 tqdm
 trimesh
 scikit-image
+scikit-learn
 opencv-python
 configargparse
 lpips
