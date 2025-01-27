@@ -236,7 +236,6 @@ log/
 │       │   ├── diffuse_imgs/
 │       │   ├── erp_recons/
 │       │   ├── view_dep_imgs/
-│       │   ├── palette.pth
 │       │   └── mean.txt
 │       ├── palette/
 │       │   ├── extract-mesh_obj_files.obj
