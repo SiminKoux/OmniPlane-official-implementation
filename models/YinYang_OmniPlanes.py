@@ -109,13 +109,6 @@ class YinYang_OmniPlanes(TensorBase):
         self.basis_mat_yin = torch.nn.Linear(sum(self.app_n_comp), self.app_dim, bias=False).to(device)
         self.basis_mat_yang = torch.nn.Linear(sum(self.app_n_comp), self.app_dim, bias=False).to(device)
 
-        # # Initialize the basis matrices
-        # with torch.no_grad():
-        #     weights_yin = torch.ones_like(self.density_basis_mat_yin.weight) / float(self.density_dim)
-        #     weights_yang = torch.ones_like(self.density_basis_mat_yang.weight) / float(self.density_dim)
-        #     self.density_basis_mat_yin.weight.copy_(weights_yin)
-        #     self.density_basis_mat_yin.weight.copy_(weights_yang)
-
     def init_one_svd(self, n_component, gridSize, device):
         plane_coef_yin, line_coef_yin = [], []
         plane_coef_yang, line_coef_yang = [], []
@@ -972,10 +965,8 @@ class YinYang_OmniPlanes(TensorBase):
             alpha = fine_alpha         # [4096, 256]
             bg_weight = fine_bg_weight # [4096, 1]
             z_vals = fine_z_vals
-            dists = fine_dists
 
         else:
-            # coarse_sigma_feature = self.compute_densityfeature(coarse_coords_sampled)
             coarse_sigma_feature = self.compute_densityfeature_t(coarse_coords_sampled, coarse_frame_time)
             coarse_sigma_feature = self.density_regressor(coarse_coords_sampled,
                                                           viewdirs,
@@ -985,15 +976,12 @@ class YinYang_OmniPlanes(TensorBase):
             coarse_alpha, coarse_weight, coarse_bg_weight = raw2alpha(coarse_sigma, coarse_dists * self.distance_scale)  # TODO: need distance_scale at here?
 
             viewdirs = viewdirs.view(-1, 1, 3).expand(coarse_xyz_sampled.shape)
-            # app_mask = torch.ones_like(coarse_weight, dtype=torch.bool)
-            # app_features = self.compute_appfeature(coarse_coords_sampled)
             app_features = self.compute_appfeature_t(coarse_coords_sampled, coarse_frame_time)
             rgb = self.renderModule(coarse_coords_sampled, viewdirs, app_features, coarse_frame_time)
             weight = coarse_weight
             alpha = coarse_alpha
             bg_weight = coarse_bg_weight
             z_vals = coarse_z_vals
-            dists = coarse_dists
 
         acc_map = torch.sum(weight, -1)  # [4096]
         rgb_map = torch.sum(weight[..., None] * rgb, -2)  # [4096, 3]
@@ -1004,16 +992,16 @@ class YinYang_OmniPlanes(TensorBase):
             env_map = self.envmap.get_radiance(viewdirs[:, 0, :])
             bg_map = bg_weight * env_map
             rgb_map = rgb_map + bg_map
-            # rgb_map = rgb_map + bg_weight * self.envmap.get_radiance(viewdirs[:, 0, :]).view(-1, 3)
-
         rgb_map = rgb_map.clamp(0, 1)  # ensuring that all values in the 'rgb_map' are between 0 and 1
 
         # depth_map is a tensor of shape [4096]
         with torch.no_grad():
             depth_map = torch.sum(weight * z_vals, -1)
-            # depth_map = depth_map + torch.squeeze(bg_weight) * z_vals[:, -1]
             depth_map = depth_map + (1. - acc_map) * rays_chunk[..., -1]
 
-        mid_points = (z_vals[..., 1:] + z_vals[..., :-1]) * 0.5
-
-        return rgb_map, depth_map, bg_map, env_map, alpha
+        return {"rgb_map": rgb_map,
+                "depth_map": depth_map,
+                "bg_map": bg_map,
+                "env_map": env_map,
+                "alpha": alpha,
+                "acc_map": acc_map}
