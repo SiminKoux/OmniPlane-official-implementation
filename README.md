@@ -63,7 +63,9 @@ data/
 
 ## Training
 Our recolorable OmniPlane involves two training stages.
+
 **Stage 1: Train for OmniPlane**
+
 To train OmniPlanes on individual scenes, run the script below.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt
@@ -93,7 +95,9 @@ if (iteration + 1) in vis_list and args.N_vis != 0:
             )
             summary_writer.add_scalar('test/psnr', np.mean(PSNRs_test), global_step=iteration)
 ```
+
 **Stage 2: Train for palette-based color decomposition on learned OmniPlane from stage 1**
+
 Before the color decomposition training, run the script below to extract palette as initialization.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt --palette_extract 1
