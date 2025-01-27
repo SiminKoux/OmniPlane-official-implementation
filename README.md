@@ -62,6 +62,8 @@ data/
 ```
 
 ## Training
+Our recolorable OmniPlane involves two training stages.
+### Stage 1:
 To train OmniPlanes on individual scenes, run the script below.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt
@@ -91,12 +93,18 @@ if (iteration + 1) in vis_list and args.N_vis != 0:
             )
             summary_writer.add_scalar('test/psnr', np.mean(PSNRs_test), global_step=iteration)
 ```
-
+### Stage 2:
+Before the color decomposition training, run the script below to extract palette as initialization.
+```bash
+python main.py --config configs/omni/specific_instance/default.txt --palette_extract 1
+# For example
+python main.py --config configs/omni/lab/default.txt --palette_extract 1
+```
 To train color decompostion based on learned OmniPlanes on individual scenes, run the script below.
 ```bash
-python palette_main.py --config configs/omni/specific_instance/default.txt
+python main.py --config configs/omni/specific_instance/default.txt --palette_train 1
 # For example
-python palette_main.py --config configs/omni/lab/default.txt
+python main.py --config configs/omni/lab/default.txt --palette_train 1
 ```
 
 ## Testing
@@ -107,24 +115,25 @@ python main.py --config configs/omni/specific_instance/default.txt --evaluation 
 python main.py --config configs/omni/lab/default.txt --evaluation 1
 ```
 
-## Editing/Recoloring
-To get the recolored videos based on the learned recolorable OmniPlanes, Run the script below.
+## Editing
+Our OmniPlane can support different editing applications, including recoloring, modifying light or color texture, and providing palette-based video segmentation.
+To get the edited videos based on the learned recolorable OmniPlanes, Run the script below.
 ```bash
-python palette_main.py --config configs/omni/specific_instance/default.txt --evaluation 1
+python main.py --config configs/omni/specific_instance/default.txt --palette_edit 1 --edit_option
 # For example
-python palette_main.py --config configs/omni/lab/default.txt --evaluation 1
+# Recoloring
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --recolor
+# Relighting
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --relighting
+# Retexture
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --retexture
+# Visualize Palette-based Segmentation
+python main.py --config configs/omni/lab/default.txt --palette_edit 1 --visualize_seg
 ```
 ### Custom Recolored Video Instructions
 To get the custom recolored video, please apply the following changes in the `def evaluation()` function of the `renderer.py` file:
-1. **Enable Edit Mode**:
-   - Replace the line:
-     ```python
-     edit = False
-     ```
-     with:
-     ```python
-     edit = True
-     ```
+1. **Ensure Edit Mode**:
+   - Check and ensure the parameter `edit=True`, and the `edit_option` (recolor, relighting, retexture, visualize_seg) is `True` (namely `--recolor`)
 2. **Set Target RGB Value**:
    - Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
      For example:
