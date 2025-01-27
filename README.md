@@ -161,6 +161,38 @@ For example,
      novel_palette[0, :] = target_color_1  # change the first base into red
      novel_palette[2, :] = target_color_2  # change the third base into blue
  ```
+### Instructions for Other Edits
+1. **Relighting**:
+   - Modify the **view-dependent color component**:
+     Muliply a customized `view_dep_scale` in the `def evaluation()` of the `renderer.py` on the predicted view-dependent colors.
+     ```python
+     elif lighting:
+        view_dep_scale = 6   # default: 1, options: 0, 1, 3, 6
+        edited_rgb = compose_palette_bases(M, num_basis, 
+                                           rgb_map * view_dep_scale, 
+                                           soft_color_map, 
+                                           radiance_map, 
+                                           omega_map)
+     ```
+2. **Retexture**:
+    - Modify the **palette offset component**:
+      Muliply a customized scale factor on the predicted offset in the `def forward()` of the `OmniPlanes.py`.
+     ```python
+     scaled_color = basis_color.to(device) + 3 * offset  # [B*N, num_basis, 3], 3 is the scale factor, can be changed to other values (e.g.: 0, 1, 6)
+     ```
+3. **Visualize Segmentation**:
+    - Leverage the **palette weights component**:
+      Set a threshold (e.g, .0.5) and `target_indices` that indicate which palette base color you want to extract in the `def evaluation()` of the `renderer.py`
+     ```python
+     # soft segmentation
+     visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
+     # filtered hard segmentation
+     visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=False, 
+                            threshold=0.5, target_indices=[2], bg_color=[0.9, 0.9, 0.9])
+     ```
+     For the hard segmentation, you can specify one or more palette base colors to demonstrate.
+
+     For example, using `target_indices=[2]` indicates that the third base color in the optimized palette will be selected for visualization.
 
 ## Stabilization
 To get the stabilized video frames, run the script below.
