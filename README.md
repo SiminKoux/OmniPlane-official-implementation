@@ -98,13 +98,13 @@ if (iteration + 1) in vis_list and args.N_vis != 0:
 
 **Stage 2: Train for palette-based color decomposition on learned OmniPlane from stage 1**
 
-Before the color decomposition training, run the script below to extract palette as initialization.
+Before the color decomposition training, run the script below to extract palette on the learned OmniPlane as palette initialization for the stage 2.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt --palette_extract 1
 # For example
 python main.py --config configs/omni/lab/default.txt --palette_extract 1
 ```
-To train color decompostion based on learned OmniPlanes on individual scenes, run the script below.
+To train color decompostion based on learned OmniPlane on individual scenes, run the script below.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt --palette_train 1
 # For example
