@@ -234,7 +234,6 @@ log/
 │       │   ├── basis_imgs/
 │       │   ├── depth_maps/
 │       │   ├── diffuse_imgs/
-│       │   ├── edited_frames/
 │       │   ├── erp_recons/
 │       │   ├── view_dep_imgs/
 │       │   ├── palette.pth
