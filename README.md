@@ -235,7 +235,6 @@ log/
 │       │   ├── diffuse_imgs/
 │       │   ├── edited_frames/
 │       │   ├── erp_recons/
-│       │   ├── original_frames/
 │       │   ├── view_dep_imgs/
 │       │   ├── palette.pth
 │       │   └── mean.txt
