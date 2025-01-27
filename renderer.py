@@ -675,7 +675,7 @@ def evaluation(
                 else:
                     imageio.imwrite(f'{savePath}/diffuse_imgs/{prtx}{(idx+1):03d}.png', diffuse_rgb_map)
                     imageio.imwrite(f'{savePath}/view_dep_imgs/{prtx}{(idx+1):03d}.png', rgb_map)
-                    imageio.imwrite(f'{savePath}/recons/{prtx}{(idx+1):03d}.png', final_rgb_map)
+                    imageio.imwrite(f'{savePath}/erp_recons/{prtx}{(idx+1):03d}.png', final_rgb_map)
                     imageio.imwrite(f'{savePath}/basis_imgs/{prtx}{(idx+1):03d}.png', pred_basis_img)
                     imageio.imwrite(f'{savePath}/depth_maps/{prtx}{(idx+1):03d}.png', depth_map)
  
