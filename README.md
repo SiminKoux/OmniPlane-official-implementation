@@ -138,8 +138,10 @@ python main.py --config configs/omni/lab/default.txt --palette_edit 1 --visualiz
 To get the custom recolored video, please apply the following changes in the `evaluation()` function of the `renderer.py` file:
 1. **Ensure Edit Mode**:
    - Verify that the parameter `edit` is set to `True` and that the `--recolor` flag is enabled.
+
 2. **Set Target RGB Value**:
    - Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
+
      For example:
      
      ```python
@@ -153,6 +155,7 @@ To get the custom recolored video, please apply the following changes in the `ev
      novel_palette[index, :] = target_color
      ```
      Ensure that `index` is within the valid range of the optimized palette.
+     
      Common values are `0, 1, 2, 3, 4`.
 
 **Note: If it needs to change regions with different base colors, two or more `target_color` are allowed.**
