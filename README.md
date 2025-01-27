@@ -73,7 +73,7 @@ python main.py --config configs/omni/specific_instance/default.txt
 python main.py --config configs/omni/lab/default.txt
 ```
 If you want to exclude evaluation during the training process, you can set `--N_vis 0` or comment out the following lines in the `def train()` function:
-```
+```python
 if (iteration + 1) in vis_list and args.N_vis != 0:
             PSNRs_test = evaluation(
                 test_dataset, 
@@ -141,12 +141,14 @@ To get the custom recolored video, please apply the following changes in the `ev
 2. **Set Target RGB Value**:
    - Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
      For example:
+     
      ```python
      target_color = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype)
      ```
      This sets the target color to red `(1.0, 0.0, 0.0)`. It allows setting any target color you like.
 3. **Update Recoloring Novel Palette Index**:
    - Modify the palette index in the following line:
+     
      ```python
      novel_palette[index, :] = target_color
      ```
