@@ -405,12 +405,12 @@ def evaluation(
         torch.save(original_palette, palette_file_path)
 
         novel_palette = original_palette.clone()
-        target_color = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype) # yellow
-        novel_palette[2, :] = target_color
+        target_color = torch.tensor((0.0, 0.0, 1.0), dtype=novel_palette.dtype) # blue
+        novel_palette[2, :] = target_color  # change the 3rd color to blue
         print("novel_palette:\n", novel_palette)
 
-        visualize_colors(original_palette, savePath + "_Original_Palette.png")
-        visualize_colors(novel_palette, savePath + "_Novel_Palette.png")  
+        visualize_colors(original_palette, f"{savePath}/Original_Palette.png")
+        visualize_colors(novel_palette, f"{savePath}/Novel_Palette.png")  
 
         h_diff, s_scale, v_scale = calculate_palette_changes(original_palette, novel_palette)
 
@@ -582,7 +582,7 @@ def evaluation(
                                                        omega_map)
                 
                 elif lighting:
-                    view_dep_scale = 3   # default: 1, options: 0, 3, 6
+                    view_dep_scale = 6   # default: 1, options: 0, 1, 3, 6
                     edited_rgb = compose_palette_bases(M, num_basis, 
                                                        rgb_map * view_dep_scale, 
                                                        soft_color_map, 
@@ -728,9 +728,7 @@ def palette_extract(
     """
     model.eval()
     all_valid_rgbs_norm = []
-    all_valid_positions = [] 
-    
-    os.makedirs(savePath, exist_ok=True)
+    all_valid_positions = []
 
     try:
         tqdm._instances.clear()
@@ -773,11 +771,9 @@ def palette_extract(
     positions = torch.cat(all_valid_positions, dim=0).detach().cpu().numpy()
     palette_extraction_input = {"colors": colors_norm, "positions": positions}
 
-    palette_path = os.path.join(savePath, "palette")
-    os.makedirs(palette_path, exist_ok=True)
-
-    palette_extraction(palette_extraction_input, 
-                       palette_path, H, W,
+    palette_extraction(inputs=palette_extraction_input, 
+                       output_dir=savePath, 
+                       H=H, W=W,
                        normalize_input = True,
                        error_thres = 5.0 / 255.0)
 
