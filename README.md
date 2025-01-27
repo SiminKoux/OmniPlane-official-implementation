@@ -154,6 +154,7 @@ To get the custom recolored video, please apply the following changes in the `ev
      Common values are `0, 1, 2, 3, 4`.
 
 **Note: If it needs to change regions with different base colors, two or more `target_color` are allowed.**
+
 For example,
  ```python
      target_color_1 = torch.tensor((1.0, 0.0, 0.0), dtype=novel_palette.dtype)  # red
@@ -165,6 +166,7 @@ For example,
 1. **Relighting**:
    - Adjust the **view-dependent color component**:
      Multiply the predicted view-dependent colors by a custom `view_dep_scale` within the `evaluation()` function of `renderer.py`.
+     
      ```python
      elif lighting:
         view_dep_scale = 6   # default: 1, options: 0, 1, 3, 6
@@ -177,12 +179,14 @@ For example,
 2. **Retexture**:
     - Adjust the **palette offset component**:
       Apply a custom scale factor to the predicted offset within the `forward()` function of `OmniPlanes.py`.
+      
      ```python
      scaled_color = basis_color.to(device) + 3 * offset  # 3 is the scale factor, can be changed to other values (e.g.: 0, 1, 6)
      ```
 3. **Visualize Segmentation**:
     - Leverage the **palette weights component**:
       Set a threshold (e.g., 0.5) and define `target_indices` to specify the palette base colors to visualize in the `evaluation()` function of `renderer.py`.
+      
      ```python
      # soft segmentation
      visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
@@ -191,7 +195,6 @@ For example,
                             threshold=0.5, target_indices=[2], bg_color=[0.9, 0.9, 0.9])
      ```
      For hard segmentation, you can specify one or more palette base colors for visualization.
-
      For instance, setting `target_indices=[2]` selects the third base color in the optimized palette for visualization.
 
 ## Stabilization
