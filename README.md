@@ -181,6 +181,7 @@ For example,
                                            radiance_map, 
                                            omega_map)
      ```
+     
 2. **Retexture**:
     - Adjust the **palette offset component**:
       Apply a custom scale factor to the predicted offset within the `forward()` function of `OmniPlanes.py`.
@@ -188,6 +189,7 @@ For example,
      ```python
      scaled_color = basis_color.to(device) + 3 * offset  # 3 is the scale factor, can be changed to other values (e.g.: 0, 1, 6)
      ```
+     
 3. **Visualize Segmentation**:
     - Leverage the **palette weights component**:
       Set a threshold (e.g., 0.5) and define `target_indices` to specify the palette base colors to visualize in the `evaluation()` function of `renderer.py`.
