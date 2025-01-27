@@ -626,8 +626,6 @@ class TensorBase(torch.nn.Module):
                                                      frame_time[ray_valid])
             validsigma = self.feature2density(density_feature)
             sigma[ray_valid] = validsigma.view(-1)
-            # validsigma = self.feature2density(sigma_feature)
-            # sigma[ray_valid] = validsigma
 
         # 'alpha' is the opacity; 'weight' is the accumulated weight; 
         # 'bg_weight' is the accumulated weight for last sampling point
@@ -637,8 +635,6 @@ class TensorBase(torch.nn.Module):
         # Valid rays' weight are above a threshold (rayMarch_weight_thres)
         app_mask = weight > self.rayMarch_weight_thres
         if app_mask.any():
-            # app_features = self.compute_appfeature(coords_sampled[app_mask])
-            # valid_rgbs = self.renderModule(coords_sampled[app_mask], viewdirs[app_mask], app_features)
             app_features = self.compute_appfeature(coords_sampled[app_mask], frame_time[app_mask]) # [B, N_C+N_F, 27]
             valid_rgbs = self.renderModule(coords_sampled[app_mask], 
                                            viewdirs[app_mask], 
@@ -654,13 +650,11 @@ class TensorBase(torch.nn.Module):
             env_map = self.envmap.get_radiance(viewdirs[:, 0, :])
             bg_map = bg_weight * env_map
             rgb_map = rgb_map + bg_map
-            # rgb_map = rgb_map + bg_weight * self.envmap.get_radiance(viewdirs[:, 0, :]).view(-1, 3)
 
         rgb_map = rgb_map.clamp(0, 1)
 
         with torch.no_grad():
             depth_map = torch.sum(weight * z_vals, -1)
-            # depth_map = depth_map + torch.squeeze(bg_weight) * z_vals[:, -1]
-            depth_map = depth_map + (1.0 - acc_map) * rays_chunk[..., -1]  # TODO: check this line
+            depth_map = depth_map + (1.0 - acc_map) * rays_chunk[..., -1]
 
         return rgb_map, depth_map, bg_map, env_map, alpha  # rgb, sigma, alpha, weight, bg_weight
