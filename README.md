@@ -63,7 +63,7 @@ data/
 
 ## Training
 Our recolorable OmniPlane involves two training stages.
-### Stage 1:
+**Stage 1: Train for OmniPlane**
 To train OmniPlanes on individual scenes, run the script below.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt
@@ -93,7 +93,7 @@ if (iteration + 1) in vis_list and args.N_vis != 0:
             )
             summary_writer.add_scalar('test/psnr', np.mean(PSNRs_test), global_step=iteration)
 ```
-### Stage 2:
+**Stage 2: Train for palette-based color decomposition on learned OmniPlane from stage 1**
 Before the color decomposition training, run the script below to extract palette as initialization.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt --palette_extract 1
@@ -133,7 +133,7 @@ python main.py --config configs/omni/lab/default.txt --palette_edit 1 --visualiz
 ### Custom Recolored Video Instructions
 To get the custom recolored video, please apply the following changes in the `def evaluation()` function of the `renderer.py` file:
 1. **Ensure Edit Mode**:
-   - Check and ensure the parameter `edit=True`, and the `edit_option` (recolor, relighting, retexture, visualize_seg) is `True` (namely `--recolor`)
+   - Check and ensure the parameter `edit=True`, and the `edit_option` (recolor) is `True` (namely `--recolor`)
 2. **Set Target RGB Value**:
    - Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
      For example:
