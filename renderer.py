@@ -32,7 +32,7 @@ def visualize_segmentation(omega_map, palette, H, W, savePath, frame_idx, soft=T
         # Threshold-based hard segmentation
         # Initialize with background color
         seg_map = torch.tensor(bg_color).repeat(omega_map.shape[0], 1) # [M, 3]
-        if target_indices is None:
+        if target_indices is not None:
             # Only consider target palette weights
             target_omega = omega_map[:, target_indices]  # [M, num_target]
             masks = target_omega > threshold
@@ -639,7 +639,7 @@ def evaluation(
                 visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
                 # filtered hard segmentation
                 visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=False, 
-                                        threshold=0.1, target_indices=[2], bg_color=[0.9, 0.9, 0.9])
+                                        threshold=0.5, target_indices=[2], bg_color=[0.9, 0.9, 0.9])
             elif save:
                 pass
             else:
