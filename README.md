@@ -135,9 +135,9 @@ python main.py --config configs/omni/lab/default.txt --palette_edit 1 --retextur
 python main.py --config configs/omni/lab/default.txt --palette_edit 1 --visualize_seg
 ```
 ### Custom Recolored Video Instructions
-To get the custom recolored video, please apply the following changes in the `def evaluation()` function of the `renderer.py` file:
+To get the custom recolored video, please apply the following changes in the `evaluation()` function of the `renderer.py` file:
 1. **Ensure Edit Mode**:
-   - Check and ensure the parameter `edit=True`, and the `edit_option` (recolor) is `True` (namely `--recolor`)
+   - Verify that the parameter `edit` is set to `True` and that the `--recolor` flag is enabled.
 2. **Set Target RGB Value**:
    - Replace the `target_color` variable with your desired RGB color (normalized to the range [0, 1]).
      For example:
@@ -163,8 +163,8 @@ For example,
  ```
 ### Instructions for Other Edits
 1. **Relighting**:
-   - Modify the **view-dependent color component**:
-     Muliply a customized `view_dep_scale` in the `def evaluation()` of the `renderer.py` on the predicted view-dependent colors.
+   - Adjust the **view-dependent color component**:
+     Multiply the predicted view-dependent colors by a custom `view_dep_scale` within the `evaluation()` function of `renderer.py`.
      ```python
      elif lighting:
         view_dep_scale = 6   # default: 1, options: 0, 1, 3, 6
@@ -175,14 +175,14 @@ For example,
                                            omega_map)
      ```
 2. **Retexture**:
-    - Modify the **palette offset component**:
-      Muliply a customized scale factor on the predicted offset in the `def forward()` of the `OmniPlanes.py`.
+    - Adjust the **palette offset component**:
+      Apply a custom scale factor to the predicted offset within the `forward()` function of `OmniPlanes.py`.
      ```python
-     scaled_color = basis_color.to(device) + 3 * offset  # [B*N, num_basis, 3], 3 is the scale factor, can be changed to other values (e.g.: 0, 1, 6)
+     scaled_color = basis_color.to(device) + 3 * offset  # 3 is the scale factor, can be changed to other values (e.g.: 0, 1, 6)
      ```
 3. **Visualize Segmentation**:
     - Leverage the **palette weights component**:
-      Set a threshold (e.g, .0.5) and `target_indices` that indicate which palette base color you want to extract in the `def evaluation()` of the `renderer.py`
+      Set a threshold (e.g., 0.5) and define `target_indices` to specify the palette base colors to visualize in the `evaluation()` function of `renderer.py`.
      ```python
      # soft segmentation
      visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
@@ -190,9 +190,9 @@ For example,
      visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=False, 
                             threshold=0.5, target_indices=[2], bg_color=[0.9, 0.9, 0.9])
      ```
-     For the hard segmentation, you can specify one or more palette base colors to demonstrate.
+     For hard segmentation, you can specify one or more palette base colors for visualization.
 
-     For example, using `target_indices=[2]` indicates that the third base color in the optimized palette will be selected for visualization.
+     For instance, setting `target_indices=[2]` selects the third base color in the optimized palette for visualization.
 
 ## Stabilization
 To get the stabilized video frames, run the script below.
