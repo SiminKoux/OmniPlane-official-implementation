@@ -37,7 +37,10 @@ def render_test(args):
     test_dataset = dataset(**load_params)
 
     if args.ckpt is None:
-        ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}.th')
+        if args.use_palette:
+            ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}_palette.th')
+        else:
+            ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}.th')
     else:
         ckpt = args.ckpt
 
@@ -55,7 +58,10 @@ def render_test(args):
     renderer = volume_renderer
 
     if args.ckpt is None:
-        evaluation_dir = f'{args.basedir}/{args.expname}/evaluation'
+        if args.use_palette:
+            evaluation_dir = f'{args.basedir}/{args.expname}/evaluation_palette'
+        else:
+            evaluation_dir = f'{args.basedir}/{args.expname}/evaluation'
     else:
         evaluation_dir = f'{args.basedir}/{args.expname}/evaluation_{args.ckpt.split(".")[-2].split("_")[-1]}'
     os.makedirs(evaluation_dir, exist_ok=True)
@@ -75,9 +81,10 @@ def render_test(args):
         resampling=args.resampling, 
         empty_gpu_cache=True, 
         use_coarse_sample=args.use_coarse_sample, 
-        use_palette=False,
+        use_palette=args.use_palette,
         interval_th=args.interval_th,
         test=True,
+        edit=False,
         recolor=False,
         lighting=False,
         texture=False,
@@ -106,7 +113,7 @@ def render_edit(args):
     test_dataset = dataset(**load_params)
 
     if args.ckpt is None:
-        ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}.th')
+        ckpt = os.path.join(f'{args.basedir}/{args.expname}/{args.expname}_palette.th')
     else:
         ckpt = args.ckpt
 
@@ -144,6 +151,7 @@ def render_edit(args):
         use_palette=args.use_palette,
         interval_th=args.interval_th,
         test=False,
+        edit=True,
         recolor=args.recolor,
         lighting=args.relighting,
         texture=args.retexture,
@@ -508,7 +516,7 @@ def palette_train(args):
                 pbar_pretrain.set_description(f'Iteration {pretrain_iter:04d}: {loss_pretrain_envmap.item()}')
 
         evaluation(test_dataset, model, args, renderer, 
-                   f'{logfolder}/imgs_vis/', N_vis=args.N_vis,
+                   f'{logfolder}/palette_imgs_vis/', N_vis=args.N_vis,
                    n_coarse=0, compute_extra_metrics=False,
                    exp_sampling=args.exp_sampling, 
                    empty_gpu_cache=True, envmap_only=True, 
@@ -571,7 +579,7 @@ def palette_train(args):
                 pred_weights = output_dict['basis_acc']
                 weight_guide_loss = torch.mean((gt_weights - pred_weights) ** 2)
                 total_loss = total_loss + weight_lambda * weight_guide_loss
-                summary_writer.add_scalar('train/reg_palette_weights', weight_guide_loss.detach().item(), global_step=iteration)
+                summary_writer.add_scalar('palette_train/reg_palette_weights', weight_guide_loss.detach().item(), global_step=iteration)
         
         # Regularization
         if args.use_palette:
@@ -580,7 +588,7 @@ def palette_train(args):
                 orginal_basis_color = model.basis_color_origin
                 palette_loss = torch.mean(((update_basis_color - orginal_basis_color) ** 2).sum(dim=-1))
                 total_loss = total_loss + palette_lambda * palette_loss
-                summary_writer.add_scalar('train/palette_supervision', palette_loss.detach().item(), global_step=iteration)
+                summary_writer.add_scalar('palette_train/palette_supervision', palette_loss.detach().item(), global_step=iteration)
             
             if hsv_reg_lambda > 0:
                 basis_color_hsv = rgb_to_hsv(update_basis_color.clamp(0, 1))  # [num_basis, 3]
@@ -606,25 +614,25 @@ def palette_train(args):
                 # # Calculate the mean while ignoring NaN values (self-comparisons)
                 # palette_h_loss = torch.nanmean(palette_h_reg)
                 total_loss = total_loss + hsv_reg_lambda * palette_h_loss.to(device)
-                summary_writer.add_scalar('train/reg_palette_h', palette_h_loss.detach().item(), global_step=iteration)
+                summary_writer.add_scalar('palette_train/reg_palette_h', palette_h_loss.detach().item(), global_step=iteration)
                 
             if omega_sparsity_lambda > 0:
                 pred_omega_sparsity = output_dict['omega_sparsitys']
                 omega_sparsity_loss = torch.mean(pred_omega_sparsity)
                 total_loss = total_loss + omega_sparsity_lambda * omega_sparsity_loss
-                summary_writer.add_scalar('train/reg_omega_sparsity', omega_sparsity_loss.detach().item(), global_step=iteration)
+                summary_writer.add_scalar('palette_train/reg_omega_sparsity', omega_sparsity_loss.detach().item(), global_step=iteration)
 
             if offset_norm_lambda > 0:
                 pred_offset_norm = output_dict['offset_norms']
                 offset_norm_loss = torch.mean(pred_offset_norm)
                 total_loss = total_loss + offset_norm_lambda * offset_norm_loss
-                summary_writer.add_scalar('train/offset_norm_sparsity', offset_norm_loss.detach().item(), global_step=iteration)
+                summary_writer.add_scalar('palette_train/offset_norm_sparsity', offset_norm_loss.detach().item(), global_step=iteration)
             
             if view_dep_norm_lambda > 0:
                 pred_view_dep_norm = output_dict['view_dep_norms']
                 view_dep_norm_loss = torch.mean(pred_view_dep_norm)
                 total_loss = total_loss + view_dep_norm_lambda * view_dep_norm_loss
-                summary_writer.add_scalar('train/reg_view_dep', view_dep_norm_loss.detach().item(), global_step=iteration)
+                summary_writer.add_scalar('palette_train/reg_view_dep', view_dep_norm_loss.detach().item(), global_step=iteration)
 
         # depth loss calculation
         if args.use_depth:  # False
@@ -639,19 +647,19 @@ def palette_train(args):
         if L1_reg_weight > 0:    # 0.0
             loss_reg_L1 = model.density_L1()
             total_loss = total_loss + L1_reg_weight * loss_reg_L1
-            summary_writer.add_scalar('train/reg_l1', loss_reg_L1.detach().item(), global_step=iteration)
+            summary_writer.add_scalar('palette_train/reg_l1', loss_reg_L1.detach().item(), global_step=iteration)
 
         # TV loss calculation, iter_ignore_TV = 100000
         if TV_weight_density > 0 and iteration < args.iter_ignore_TV:
             TV_weight_density *= lr_factor
             loss_tv = model.TV_loss_density(tvreg) * TV_weight_density
             total_loss = total_loss + loss_tv
-            summary_writer.add_scalar('train/reg_tv_density', loss_tv.detach().item(), global_step=iteration)
+            summary_writer.add_scalar('palette_train/reg_tv_density', loss_tv.detach().item(), global_step=iteration)
         if TV_weight_app > 0 and iteration < args.iter_ignore_TV:
             TV_weight_app *= lr_factor
             loss_tv = model.TV_loss_app(tvreg) * TV_weight_app
             total_loss = total_loss + loss_tv
-            summary_writer.add_scalar('train/reg_tv_app', loss_tv.detach().item(), global_step=iteration)
+            summary_writer.add_scalar('palette_train/reg_tv_app', loss_tv.detach().item(), global_step=iteration)
 
         optimizer.zero_grad()
         total_loss.backward()
@@ -660,8 +668,8 @@ def palette_train(args):
         recon_loss = recon_loss.detach().item()
 
         PSNRs.append(-10.0 * np.log(recon_loss) / np.log(10.0))
-        summary_writer.add_scalar('train/PSNR', PSNRs[-1], global_step=iteration)
-        summary_writer.add_scalar('train/recon_loss', recon_loss, global_step=iteration)
+        summary_writer.add_scalar('palette_train/PSNR', PSNRs[-1], global_step=iteration)
+        summary_writer.add_scalar('palette_train/recon_loss', recon_loss, global_step=iteration)
 
         # Empty cache in each 1000 iters
         if iteration % 1000 == 0:
@@ -676,9 +684,9 @@ def palette_train(args):
         if iteration % args.progress_refresh_rate == 0:
             pbar.set_description(
                 f'Iteration {(iteration):06d}:'
-                + f' train_psnr = {float(np.mean(PSNRs)):.2f}'
-                + f' test_psnr = {float(np.mean(PSNRs_test)):.2f}'
-                + f' recon_loss = {recon_loss:.6f}'
+                + f' palette_train_psnr = {float(np.mean(PSNRs)):.2f}'
+                + f' palette_test_psnr = {float(np.mean(PSNRs_test)):.2f}'
+                + f' palette_recon_loss = {recon_loss:.6f}'
             )
             PSNRs = []
 
