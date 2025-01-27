@@ -98,7 +98,7 @@ if (iteration + 1) in vis_list and args.N_vis != 0:
 
 **Stage 2: Train for palette-based color decomposition on learned OmniPlane from stage 1**
 
-Before the color decomposition training, run the script below to extract palette on the learned OmniPlane as palette initialization for the stage 2.
+Before starting color decomposition training, run the script below to extract the palette from the learned OmniPlane, which will serve as the palette initialization for Stage 2.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt --palette_extract 1
 # For example
@@ -120,8 +120,8 @@ python main.py --config configs/omni/lab/default.txt --evaluation 1
 ```
 
 ## Editing
-Our OmniPlane can support different editing applications, including recoloring, modifying light or color texture, and providing palette-based video segmentation.
-To get the edited videos based on the learned recolorable OmniPlanes, Run the script below.
+Our OmniPlane supports various editing applications, including recoloring, adjusting lighting or color textures, and enabling palette-based video segmentation. 
+To generate edited videos using the learned recolorable OmniPlanes, run the script below.
 ```bash
 python main.py --config configs/omni/specific_instance/default.txt --palette_edit 1 --edit_option
 # For example
