@@ -48,14 +48,14 @@ def visualize_segmentation(omega_map, palette, H, W, savePath, frame_idx, soft=T
                 # Apply colors only for valid pixels
                 seg_map[valid_pixels] = palette[actual_idx]  # [M, 3]
         
-        # Reshape to image size and save
-        seg_map = seg_map.reshape(H, W, 3)
-        seg_map = (seg_map.numpy() * 255).astype('uint8')
+    # Reshape to image size and save
+    seg_map = seg_map.reshape(H, W, 3)
+    seg_map = (seg_map.numpy() * 255).astype('uint8')
 
-        # Save the segmentation map
-        suffix = 'soft' if soft else f'hard_th{threshold}'
-        os.makedirs(f'{savePath}/segmentation_{suffix}', exist_ok=True)
-        imageio.imwrite(f'{savePath}/segmentation_{suffix}/{frame_idx:03d}.png', seg_map)
+    # Save the segmentation map
+    suffix = 'soft' if soft else f'hard_th{threshold}'
+    os.makedirs(f'{savePath}/segmentation/{suffix}', exist_ok=True)
+    imageio.imwrite(f'{savePath}/segmentation/{suffix}/{frame_idx:03d}.png', seg_map)
 
 def volume_renderer(
         rays, 
@@ -355,6 +355,7 @@ def evaluation(
         use_palette=False,
         interval_th=False,
         test=True,
+        edit=False,
         recolor=False,
         lighting=False,
         texture=False,
@@ -379,6 +380,8 @@ def evaluation(
         elif texture:    
             os.makedirs(savePath + "/retextured_frames", exist_ok=True)
             os.makedirs(savePath + "/original_frames", exist_ok=True)
+        elif mask:
+            os.makedirs(savePath + "/segmentation", exist_ok=True)
         else:
             os.makedirs(savePath + "/erp_recons", exist_ok=True)
             os.makedirs(savePath + "/depth_maps", exist_ok=True)
@@ -541,7 +544,7 @@ def evaluation(
                     radiance_map = radiance_map.cpu()
                     omega_map = omega_map.cpu()
         
-        if use_palette and not mask:
+        if use_palette and not mask and edit:
             if save:
                 soft_color_map = soft_color_map.view(-1, 3) # [M * num_basis, 3]
                 soft_color_hsv = rgb_to_hsv(soft_color_map)      # [M * num_basis, 3]
@@ -626,33 +629,34 @@ def evaluation(
                     l_vgg.append(l_v)
 
         # Convert results to numpy 'uint8' for visualize into images
-        if not save and not test:
-            if use_palette:
-                if recolor or lighting or texture:
-                    original_rgb_map = (original_rgb_map.numpy() * 255).astype('uint8')
-                    edited_rgb_map = (edited_rgb_map.numpy() * 255).astype('uint8')
-                elif mask:
-                    palette = model.basis_color.clone().clamp(0., 1.)  # [num_basis, 3]
-                    # soft segmentation
-                    visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
-                    # filtered hard segmentation
-                    visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=False, 
-                                           threshold=0.5, target_indices=[3], bg_color=[0.9, 0.9, 0.9])
-                else:
-                    rgb_map = (rgb_map.numpy() * 255).astype('uint8')
-                    depth_map, _ = visualize_depth_numpy(depth_map.numpy(), near_far)
-                    diffuse_rgb_map = (diffuse_rgb_map.numpy() * 255).astype('uint8')
-                    final_rgb_map = (final_rgb_map.numpy() * 255).astype('uint8')
-                    pred_basis_img = (pred_basis_img.numpy() * 255).astype('uint8')
+        if use_palette:
+            if recolor or lighting or texture:
+                original_rgb_map = (original_rgb_map.numpy() * 255).astype('uint8')
+                edited_rgb_map = (edited_rgb_map.numpy() * 255).astype('uint8')
+            elif mask:
+                palette = model.basis_color.clone().clamp(0., 1.)  # [num_basis, 3]
+                # soft segmentation
+                visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=True)
+                # filtered hard segmentation
+                visualize_segmentation(omega_map, palette, H, W, savePath, idx+1, soft=False, 
+                                        threshold=0.1, target_indices=[2], bg_color=[0.9, 0.9, 0.9])
+            elif save:
+                pass
             else:
                 rgb_map = (rgb_map.numpy() * 255).astype('uint8')
                 depth_map, _ = visualize_depth_numpy(depth_map.numpy(), near_far)
-                if env_map is not None:
-                    bg_map = (bg_map.numpy() * 255).astype('uint8')
-                    if idx == 0:
-                        env_map = (env_map.numpy() * 255).astype('uint8')
+                diffuse_rgb_map = (diffuse_rgb_map.numpy() * 255).astype('uint8')
+                final_rgb_map = (final_rgb_map.numpy() * 255).astype('uint8')
+                pred_basis_img = (pred_basis_img.numpy() * 255).astype('uint8')
+        else:
+            rgb_map = (rgb_map.numpy() * 255).astype('uint8')
+            depth_map, _ = visualize_depth_numpy(depth_map.numpy(), near_far)
+            if env_map is not None:
+                bg_map = (bg_map.numpy() * 255).astype('uint8')
+                if idx == 0:
+                    env_map = (env_map.numpy() * 255).astype('uint8')
         
-        if savePath is not None and not test:
+        if savePath is not None:
             if use_palette:
                 if save:
                     file_path = os.path.join(savePath, 'out_dict', f'{(idx+1):03d}.pth')
@@ -667,7 +671,7 @@ def evaluation(
                     imageio.imwrite(f'{savePath}/retextured_frames/{prtx}{(idx+1):03d}.png', edited_rgb_map)
                     imageio.imwrite(f'{savePath}/original_frames/{prtx}{(idx+1):03d}.png', original_rgb_map)
                 elif mask:
-                    print("Segmentation maps are saved.")
+                    pass
                 else:
                     imageio.imwrite(f'{savePath}/diffuse_imgs/{prtx}{(idx+1):03d}.png', diffuse_rgb_map)
                     imageio.imwrite(f'{savePath}/view_dep_imgs/{prtx}{(idx+1):03d}.png', rgb_map)
