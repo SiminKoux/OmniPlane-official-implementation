@@ -224,7 +224,8 @@ log/
 │       │   ├── retextured_frames/
 │       │   ├── segmentation/
 │       │   ├── Novel_Palette.png
-│       │   └── Original_Palette.png
+│       │   ├── Original_Palette.png
+│       │   └── palette.pth
 │       ├── evaluation/
 │       │   ├── depth_maps/
 │       │   ├── erp_recons/
