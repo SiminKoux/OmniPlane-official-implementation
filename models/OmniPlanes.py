@@ -1169,7 +1169,7 @@ class OmniPlanes(TensorBase):
             omega = omega.view(-1, self.num_basis, 1)     # [B*N, num_basis, 1]
             
             soft_color = basis_color.to(device) + offset    # [B*N, num_basis, 3]
-            scaled_color = basis_color.to(device) * 1 * offset  # [B*N, num_basis, 3]
+            scaled_color = basis_color.to(device) + 3 * offset  # [B*N, num_basis, 3], 3 is the scale factor, can be changed to other values (e.g.: 0, 1, 6)
             final_color = F.softplus(radiance) * soft_color # [B*N, num_basis, 3]
             basis_rgb = omega * final_color                 # [B*N, num_basis, 3]
             basis_rgb = basis_rgb.view(B, N, self.num_basis, 3) # [B, N, num_basis, 3]
