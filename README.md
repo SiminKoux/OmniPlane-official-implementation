@@ -261,7 +261,7 @@ log/
 ```
 
 ## Acknowledgement
-Our code is hugely influenced by [EgoNeRF](https://github.com/changwoonchoi/EgoNeRF), [HexPlane](https://github.com/Caoang327/HexPlane) and many other projects. We would like to acknowledge them for making great code openly avaliable for us to use.
+Our code is hugely influenced by [EgoNeRF](https://github.com/changwoonchoi/EgoNeRF), [HexPlane](https://github.com/Caoang327/HexPlane)，[PaletteNeRF](https://github.com/zfkuang/PaletteNeRF?tab=readme-ov-file) and many other projects. We would like to acknowledge them for making great code available for us.
 
 ## Copyright and license
 
