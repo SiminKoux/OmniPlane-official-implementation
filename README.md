@@ -217,7 +217,19 @@ python main.py --config configs/omni/lab/default.txt --stabilize 1
 log/
 ├── video1/
 │   └── OmniPlanes/
+│       ├── edit_results/
+│       │   ├── original_frames/
+│       │   ├── recolored_frames/
+│       │   ├── relighted_frames/
+│       │   ├── retextured_frames/
+│       │   ├── segmentation/
+│       │   ├── Novel_Palette.png
+│       │   └── Original_Palette.png
 │       ├── evaluation/
+│       │   ├── depth_maps/
+│       │   ├── erp_recons/
+│       │   └── mean.txt
+│       ├── evaluation_palette/
 │       │   ├── basis_imgs/
 │       │   ├── depth_maps/
 │       │   ├── diffuse_imgs/
@@ -236,10 +248,9 @@ log/
 │       │   ├── hist_weights.npz
 │       │   └── palette.npz
 │       ├── OmniPlanes.th
+│       ├── OmniPlanes_palette.th
 │       ├── args.txt
-│       ├── config.txt
-│       ├── evaluation_Novel_Palette.png
-│       └── evaluation_Original_Palette.png
+│       └── config.txt
 ├── video2/
 │   └── OmniPlanes/
 │       ├── evaluation/
