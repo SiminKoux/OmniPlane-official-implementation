@@ -34,11 +34,6 @@ pip install -r requirements.txt
 ## Dataset Composition
 You can download our [DyOmni](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q) dataset.
 
-**Note:**
-The `train.txt' and `test.txt' both include all frames, aiming to evaluate its complete reconstruction performance, not focusing on novel view synthesis capacity.
-That said, our model does possess a certain generalization ability to generate novel views, so it also supports splitting out some test frames from the entire set of video frames.
-If you require a complete separation between training and testing images, you can simply adjust the numbers in the 'train.txt' and 'test.txt' files. These two files directly control which images from the scene are used for training and testing. For example, if you want to alternate frames—using one for training and the next for testing—the 'train.txt' would include frames like 1, 3, 5, ..., 99, while the 'test.txt' would contain 2, 4, 6, ..., 100. This example of train and test splits can be found in the `example' folder of this repository.
-
 ```text
 data/
 └── omni/
@@ -66,6 +61,15 @@ data/
     │   └── train.txt
     └── ...
 ```
+
+**Note:**
+The `train.txt` and `test.txt` both include all frames, aiming to evaluate its complete reconstruction performance, not focusing on novel view synthesis capacity.
+
+That said, our model does possess a certain generalization ability to generate novel views, so it also supports splitting out some test frames from the entire set of video frames.
+If you require a complete separation between training and testing images, you can simply adjust the numbers in the `train.txt` and `test.txt` files. These two files directly control which images from the scene are used for training and testing. 
+
+For example, if you want to alternate frames—using one for training and the next for testing—the `train.txt` would include frames like `1, 3, 5, ..., 99`, while the `test.txt` would contain `2, 4, 6, ..., 100`. This example of train and test splits can be found in the `example` folder of this repository.
+
 
 ## Training
 Our recolorable OmniPlane involves two training stages.
