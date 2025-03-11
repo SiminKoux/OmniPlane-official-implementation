@@ -1,6 +1,6 @@
 include = ../common.txt
 
-datadir = ./data/omni/campus
-basedir = ./log/campus
+datadir = ./data/DyOmni/Campus
+basedir = ./log/Campus
 use_envmap
 iter_pretrain_envmap = -1
