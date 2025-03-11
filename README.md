@@ -32,7 +32,8 @@ pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --e
 pip install -r requirements.txt
 ```
 ## Dataset Composition
-You can download our $\textit{**Dyomni**}$ dataset from [OneDrive](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q).
+You can download our _**Dyomni**_ dataset from [OneDrive](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q).
+
 **Note:** This OneDrive link is hosted by my university. However, access might be lost after I graduate, depending on the university’s policies.
 
 To ensure long-term availability, you can also download the dataset from Hugging Face using the following command:
