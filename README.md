@@ -11,12 +11,12 @@ We tested the code on RTX 3090Ti GPU, with PyTorch 1.13.1 in a Python 3.9 enviro
 ### Clone the repository
 ```bash
 # SSH
-$ git clone git@github.com:SiminKoux/Recolorable_OmniPlanes.git
+$ git clone git@github.com/SiminKoux/OmniPlane-official-implementation.git
 ```
 or
 ```bash
 # HTTP
-$ git clone https://github.com/SiminKoux/Recolorable_OmniPlanes.git
+$ git clone https://github.com/SiminKoux/OmniPlane-official-implementation.git
 ```
 
 ### Environment setup
