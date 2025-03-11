@@ -3,7 +3,7 @@
 This repository is the official PyTorch implementation of [OmniPlane](https://ieeexplore.ieee.org/document/10847904/media#media), which is accepted by TVCG.
 
 ## Overview
-OmniPlanes is a feature-grid-based dynamic scene representation for modeling Omnidirectional (360-degree) videos, utilizing weighted ERP spherical coordinates with time dependency. Incorporating palette-based color decomposition to achieve intuitive recoloring.
+OmniPlane is a feature-grid-based dynamic scene representation for modeling Omnidirectional (360-degree) videos, utilizing weighted ERP spherical coordinates with time dependency. Incorporating palette-based color decomposition to achieve intuitive recoloring.
 
 ## Installation
 We tested the code on RTX 3090Ti GPU, with PyTorch 1.13.1 in a Python 3.9 environment.
