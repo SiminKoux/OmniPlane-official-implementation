@@ -43,7 +43,7 @@ git clone git@hf.co:datasets/SiminKou/DyOmni.git
 **Dataset Composition**
 ```text
 data/
-└── omni/
+└── DyOmni/
     ├── scene1/
     │   ├── erp_imgs/
     │   │   ├── 1.png
@@ -55,11 +55,13 @@ data/
     │   │       ├── images.txt
     │   │       └── points3D.txt
     │   ├── test.txt
+    │   ├── time.txt
     │   └── train.txt
     ├── scene2/
     │   ├── erp_imgs/
     │   ├── output_dir/
     │   ├── test.txt
+    │   ├── time.txt
     │   └── train.txt
     └── ...
 ```
