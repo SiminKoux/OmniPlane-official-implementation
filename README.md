@@ -221,7 +221,7 @@ python main.py --config configs/omni/lab/default.txt --stabilize 1
 ## Results Composition (include all operations)
 ```text
 log/
-├── video1/
+├── scene1/
 │   └── OmniPlanes/
 │       ├── edit_results/
 │       │   ├── original_frames/
@@ -255,7 +255,7 @@ log/
 │       ├── OmniPlanes_palette.th
 │       ├── args.txt
 │       └── config.txt
-├── video2/
+├── scene2/
 │   └── OmniPlanes/
 │       ├── evaluation/
 │       ├── palette/
