@@ -258,6 +258,18 @@ log/
 └── ...
 ```
 
+## Citation
+Cite as below if you find this paper, dataset, and repository helpful to you:
+```
+@article{kou2025omniplane,
+  title={OmniPlane: A Recolorable Representation for Dynamic Scenes in Omnidirectional Videos},
+  author={Kou, Simin and Zhang, Fang-Lue and Nazarenus, Jakob and Koch, Reinhard and Dodgson, Neil A},
+  journal={IEEE Transactions on Visualization and Computer Graphics},
+  year={2025},
+  publisher={IEEE}
+}
+```
+
 ## Acknowledgement
 Our code is hugely influenced by [EgoNeRF](https://github.com/changwoonchoi/EgoNeRF), [HexPlane](https://github.com/Caoang327/HexPlane)，[PaletteNeRF](https://github.com/zfkuang/PaletteNeRF?tab=readme-ov-file) and many other projects. We would like to acknowledge them for making great code available for us.
 
