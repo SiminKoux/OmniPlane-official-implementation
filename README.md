@@ -31,20 +31,20 @@ conda activate omniplanes
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 pip install -r requirements.txt
 ```
-## Dataset Composition
+## Dataset
 You can download our _**Dyomni**_ dataset from [OneDrive](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q).<br>
 <sub>**Note:** This OneDrive link is hosted by my university. However, access might be lost after I graduate, depending on the university’s policies.</sub>
 
-To ensure long-term availability, you can also download the dataset from Hugging Face using the following command:
+To ensure long-term availability, you can also download the dataset from [Hugging Face](https://huggingface.co/datasets/SiminKou/DyOmni) using:
 ```bash
 git clone git@hf.co:datasets/SiminKou/DyOmni.git
 ```
 
-
+**Dataset Composition**
 ```text
 data/
 └── omni/
-    ├── video1/
+    ├── scene1/
     │   ├── erp_imgs/
     │   │   ├── 1.png
     │   │   ├── 2.png
@@ -56,7 +56,7 @@ data/
     │   │       └── points3D.txt
     │   ├── test.txt
     │   └── train.txt
-    ├── video2/
+    ├── scene2/
     │   ├── erp_imgs/
     │   ├── output_dir/
     │   ├── test.txt
