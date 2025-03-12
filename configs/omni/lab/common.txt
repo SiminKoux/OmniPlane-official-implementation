@@ -1,4 +1,0 @@
-include = ../common.txt
-
-datadir = ./data/DyOmni/Lab
-basedir = ./log/Lab
