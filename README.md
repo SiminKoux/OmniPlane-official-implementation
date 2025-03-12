@@ -41,7 +41,7 @@ git clone git@hf.co:datasets/SiminKou/DyOmni.git
 ```
 **Example Scene Provided in This Repository**
 
-For your convenience in testing, we have also uploaded an example indoor scene, _**Lab**_, which allows you to directly run ``bash run.sh`` to obtain recolored results and the corresponding models.
+For your convenience in testing, we have also uploaded an example indoor scene, _**Lab**_, which allows you to directly run ``bash run.sh`` to obtain recolored results (e.g. representative_figure.png) along with the corresponding models.
 
 **Dataset Composition**
 ```text
