@@ -76,9 +76,9 @@ Our recolorable OmniPlane involves two training stages.
 
 To train OmniPlanes on individual scenes, run the script below.
 ```bash
-python main.py --config configs/omni/specific_instance/default.txt
+python main.py --config configs/DyOmni/specific_instance/default.txt
 # For example
-python main.py --config configs/omni/lab/default.txt
+python main.py --config configs/DyOmni/Lab/default.txt
 ```
 If you want to exclude evaluation during the training process, you can set `--N_vis 0` or comment out the following lines in the `def train()` function:
 ```python
@@ -108,39 +108,39 @@ if (iteration + 1) in vis_list and args.N_vis != 0:
 
 Before starting color decomposition training, run the script below to extract the palette from the learned OmniPlane, which will serve as the palette initialization for Stage 2.
 ```bash
-python main.py --config configs/omni/specific_instance/default.txt --palette_extract 1
+python main.py --config configs/DyOmni/specific_instance/default.txt --palette_extract 1
 # For example
-python main.py --config configs/omni/lab/default.txt --palette_extract 1
+python main.py --config configs/DyOmni/Lab/default.txt --palette_extract 1
 ```
 To train color decompostion based on learned OmniPlane on individual scenes, run the script below.
 ```bash
-python main.py --config configs/omni/specific_instance/default.txt --palette_train 1
+python main.py --config configs/DyOmni/specific_instance/default.txt --palette_train 1
 # For example
-python main.py --config configs/omni/lab/default.txt --palette_train 1
+python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1
 ```
 
 ## Testing
 To evaluate after training, run the script below.
 ```bash
-python main.py --config configs/omni/specific_instance/default.txt --evaluation 1
+python main.py --config configs/DyOmni/specific_instance/default.txt --evaluation 1
 # For example
-python main.py --config configs/omni/lab/default.txt --evaluation 1
+python main.py --config configs/DyOmni/Lab/default.txt --evaluation 1
 ```
 
 ## Editing
 Our OmniPlane supports various editing applications, including recoloring, adjusting lighting or color textures, and enabling palette-based video segmentation. 
 To generate edited videos using the learned recolorable OmniPlanes, run the script below.
 ```bash
-python main.py --config configs/omni/specific_instance/default.txt --palette_edit 1 --edit_option
+python main.py --config configs/DyOmni/specific_instance/default.txt --palette_edit 1 --edit_option
 # For example
 # Recoloring
-python main.py --config configs/omni/lab/default.txt --palette_edit 1 --recolor
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --recolor
 # Relighting
-python main.py --config configs/omni/lab/default.txt --palette_edit 1 --relighting
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --relighting
 # Retexture
-python main.py --config configs/omni/lab/default.txt --palette_edit 1 --retexture
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --retexture
 # Visualize Palette-based Segmentation
-python main.py --config configs/omni/lab/default.txt --palette_edit 1 --visualize_seg
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --visualize_seg
 ```
 ### Custom Recolored Video Instructions
 To get the custom recolored video, please apply the following changes in the `evaluation()` function of the `renderer.py` file:
@@ -215,9 +215,9 @@ For example,
 ## Stabilization
 To get the stabilized video frames, run the script below.
 ```bash
-python main.py --config configs/omni/specific_instance/default.txt --stabilize 1
+python main.py --config configs/DyOmni/specific_instance/default.txt --stabilize 1
 # For example
-python main.py --config configs/omni/lab/default.txt --stabilize 1
+python main.py --config configs/DyOmni/Lab/default.txt --stabilize 1
 ```
 
 ## Results Composition (include all operations)
