@@ -75,11 +75,20 @@ Our recolorable OmniPlane involves two training stages.
 **Stage 1: Train for OmniPlane**
 
 To train OmniPlanes on individual scenes, run the script below.
+
+**For indoor scenes:**
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt
 # For example
 python main.py --config configs/DyOmni/Lab/default.txt
 ```
+**For outdoor scenes:**
+```bash
+python main.py --config configs/DyOmni/specific_instance/default.txt --time_grid 100 --r0 0.05 --distance_scale 10.0
+# For example
+python main.py --config configs/DyOmni/Campus/default.txt --time_grid 100 --r0 0.05 --distance_scale 10.0
+```
+
 If you want to exclude evaluation during the training process, you can set `--N_vis 0` or comment out the following lines in the `def train()` function:
 ```python
 if (iteration + 1) in vis_list and args.N_vis != 0:
