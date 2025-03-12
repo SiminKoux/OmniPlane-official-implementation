@@ -76,13 +76,13 @@ Our recolorable OmniPlane involves two training stages.
 
 To train OmniPlanes on individual scenes, run the script below.
 
-**For indoor scenes:**
+*For indoor scenes:*</br>
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt
 # For example
 python main.py --config configs/DyOmni/Lab/default.txt
 ```
-**For outdoor scenes:**
+*For outdoor scenes:*</br>
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt --time_grid 100 --r0 0.05 --distance_scale 10.0
 # For example
