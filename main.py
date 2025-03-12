@@ -1191,4 +1191,4 @@ if __name__ == '__main__':
     else:
         # run train
         train(args)
-        render_test(args)
+        # render_test(args)
