@@ -4,7 +4,7 @@ model_name = YinYang_OmniPlanes
 dataset_name = omnivideos
 exp_sampling = True
 
-n_iters = 30000
+n_iters = 100000
 batch_size = 4096
 lr_init = 0.02
 weight_decay_iters = 5000
