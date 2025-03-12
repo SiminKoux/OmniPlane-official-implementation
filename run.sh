@@ -8,7 +8,8 @@ python main.py --config configs/DyOmni/Lab/default.txt
 # change the corresponding .txt name
 # For example, if train for indoor scene 'Lab' in werp grids, 
 # please let the 'common_werp_recon_indoor.txt' renamed into 'common.txt' 
-python main.py --config configs/DyOmni/Lab/default.txt --evaluation 1
+# please uncomment the following command if you need to evaluate and rendering the final images
+# python main.py --config configs/DyOmni/Lab/default.txt --evaluation 1
 
 # Extract initialized palette based on the stage 1's model
 # change the corresponding .txt name
@@ -36,7 +37,7 @@ python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1
 # please uncomment the following commands to activate their respective editing functions
 # There are different editing options:
 # 1. Recoloring
-# python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --recolor
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --recolor
 # 2. Relighting
 # python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --relighting
 # 3. Retexturing
