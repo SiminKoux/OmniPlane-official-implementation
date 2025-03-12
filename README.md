@@ -138,6 +138,7 @@ python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --us
 
 ## Testing
 To evaluate after training, run the script below.
+
 *Evaluate the Stage 1's resulting model:*
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt --evaluation 1
