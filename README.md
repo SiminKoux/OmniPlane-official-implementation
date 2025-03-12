@@ -76,13 +76,13 @@ Our recolorable OmniPlane involves two training stages.
 
 To train OmniPlanes on individual scenes, run the script below.
 
-*For indoor scenes:*</br>
+*For indoor scenes:*
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt
 # For example
 python main.py --config configs/DyOmni/Lab/default.txt
 ```
-*For outdoor scenes:*</br>
+*For outdoor scenes:*
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt --time_grid 100 --r0 0.05 --distance_scale 10.0
 # For example
@@ -121,35 +121,50 @@ python main.py --config configs/DyOmni/specific_instance/default.txt --palette_e
 # For example
 python main.py --config configs/DyOmni/Lab/default.txt --palette_extract 1
 ```
-To train color decompostion based on learned OmniPlane on individual scenes, run the script below.
+To train color decomposition based on learned OmniPlane on individual scenes, run the script below.
+
+*For indoor scenes:*
 ```bash
-python main.py --config configs/DyOmni/specific_instance/default.txt --palette_train 1
+python main.py --config configs/DyOmni/specific_instance/default.txt --palette_train 1 --use_palette --n_iters 30000
 # For example
-python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1
+python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1 --use_palette --n_iters 30000
+```
+*For outdoor scenes:*
+```bash
+python main.py --config configs/DyOmni/specific_instance/default.txt --palette_train 1 --use_palette --n_iters 30000 --time_grid 100 --r0 0.05 --distance_scale 10.0
+# For example
+python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --time_grid 100 --r0 0.05 --distance_scale 10.0
 ```
 
 ## Testing
 To evaluate after training, run the script below.
+*Evaluate the Stage 1's resulting model:*
 ```bash
 python main.py --config configs/DyOmni/specific_instance/default.txt --evaluation 1
 # For example
 python main.py --config configs/DyOmni/Lab/default.txt --evaluation 1
+```
+*Evaluate the Stage 2's resulting model:*
+```bash
+python main.py --config configs/DyOmni/specific_instance/default.txt --evaluation 1 --use_palette
+# For example
+python main.py --config configs/DyOmni/Lab/default.txt --evaluation 1 --use_palette
 ```
 
 ## Editing
 Our OmniPlane supports various editing applications, including recoloring, adjusting lighting or color textures, and enabling palette-based video segmentation. 
 To generate edited videos using the learned recolorable OmniPlanes, run the script below.
 ```bash
-python main.py --config configs/DyOmni/specific_instance/default.txt --palette_edit 1 --edit_option
+python main.py --config configs/DyOmni/specific_instance/default.txt --palette_edit 1 --use_palette --edit_option
 # For example
 # Recoloring
-python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --recolor
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --use_palette --recolor
 # Relighting
-python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --relighting
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --use_palette --relighting
 # Retexture
-python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --retexture
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --use_palette --retexture
 # Visualize Palette-based Segmentation
-python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --visualize_seg
+python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --use_palette --visualize_seg
 ```
 ### Custom Recolored Video Instructions
 To get the custom recolored video, please apply the following changes in the `evaluation()` function of the `renderer.py` file:
