@@ -31,7 +31,7 @@ You can download our _**Dyomni**_ dataset from [OneDrive](https://vuw-my.sharepo
 
 To ensure long-term availability, you can also download the dataset from [Hugging Face](https://huggingface.co/datasets/SiminKou/DyOmni) using:
 ```bash
-git clone git@hf.co:datasets/SiminKou/DyOmni.git
+git clone https://huggingface.co/datasets/SiminKou/DyOmni.git
 ```
 **Example Scene Provided in This Repository**
 
