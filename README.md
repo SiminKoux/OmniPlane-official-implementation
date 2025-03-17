@@ -17,21 +17,25 @@ git clone https://github.com/SiminKoux/OmniPlane-official-implementation.git
 ```bash
 cd OmniPlane-official-implementation
 
-# Create conda environment
-conda create -n omniplanes python=3.9
-
-# Activate env
+# Step1: Create and activate conda environment
+conda create -n omniplanes python=3.9 -y
 conda activate omniplanes
 
-# Install dependencies
+# Step2: Install dependencies
 pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 pip install -r requirements.txt
 
-# Build C++ extension
+# Step3: Ensure a compatible GCC version
+# If your system's GCC version is newer than 10 (e.g., GCC 11 or 12), install GCC 10.4:
+conda install gcc=10.4 gxx=10.4 -y
+# If using GCC 9 or 10, you can skip this step.
+
+# Step 4: Build the C++ extension
 cd palette
 pip install .
 cd .. 
 ```
+
 ## Dataset
 You can download our _**Dyomni**_ dataset from [OneDrive](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q).<br>
 <sub>**Note:** This OneDrive link is hosted by my university. However, access might be lost after I graduate, depending on the university’s policies.</sub>
