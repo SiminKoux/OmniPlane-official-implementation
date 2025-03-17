@@ -15,6 +15,8 @@ git clone https://github.com/SiminKoux/OmniPlane-official-implementation.git
 
 ### Environment setup
 ```bash
+cd OmniPlane-official-implementation
+
 # Create conda environment
 conda create -n omniplanes python=3.9
 
