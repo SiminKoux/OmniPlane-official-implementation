@@ -28,9 +28,14 @@ pip install -r requirements.txt
 # Step3: Ensure a compatible GCC version
 # If your system's GCC version is newer than 10 (e.g., GCC 11 or 12), install GCC 10.4:
 conda install gcc=10.4 gxx=10.4 -y
-# If using GCC 9 or 10, you can skip this step.
+# If using GCC 9 or 10 in your system, you can skip this step.
 
-# Step 4: Build the C++ extension
+# Step 4: Ensure a compatible CUDA version
+# If your system's CUDA version is newer than 11.x (e.g., GCC 12.2 or 12.4), install CUDA 11.6:
+conda install -c nvidia cudatoolkit=11.6 cuda-cccl=11.6 cuda-nvcc=11.6 cuda-cudart=11.6 cuda-cudart-dev=11.6 libcusparse=11.6 libcusparse-dev=11.6 libcusolver=11.6 libcusolver-dev=11.6 libcublas=11.6 libcublas-dev=11.6
+# If using CUDA 11.6 or 11.8 in your system, you can skip this step.
+
+# Step 5: Build the C++ extension
 cd palette
 pip install .
 cd .. 
