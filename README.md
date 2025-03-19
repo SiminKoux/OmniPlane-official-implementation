@@ -40,6 +40,8 @@ cd palette
 pip install .
 cd .. 
 ```
+**Notes:**
+The recommended setup is to install the appropriate GCC and CUDA versions directly on your system. Both can be installed in a local directory, and you can set the environment variables accordingly. If this setup is not convenient for you, you can safely follow Steps 3 and 4 to create the Conda environment.
 
 ## Dataset
 You can download our _**Dyomni**_ dataset from [OneDrive](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/EsP60RZWBp1Dmn_lGAcKkTgBVqQvbKwvlNXFNvVR0bFfew?e=BymM5Q).<br>
