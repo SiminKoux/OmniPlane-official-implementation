@@ -258,7 +258,7 @@ For example,
       + Copy the `palette.npz` file from the target scene and place it at the path `log/current_scene/OmniPlanes`.
       + Rename the file as `transferred_palette_from_target_scene_name.npz` (replace `target_scene_name` with the actual name of the target scene).
       + Then, proceed by following the prompt in the `forward()` function within the `OmniPlanes.py` file.
-      For reference, here’s an example that demonstrates how to transfer the palette from the target scene "Basketball" to the current scene "Lab" in the `forward` function:
+      For reference, here’s an example that demonstrates how to transfer the palette from the target scene "Basketball" to the current scene "Lab" in the `forward()` function:
 
      ```python
      basis_color = self.basis_color[None, :, :].clamp(0, 1)  # [1, num_basis, 3]
