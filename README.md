@@ -252,6 +252,25 @@ For example,
      For hard segmentation, you can specify one or more palette base colors for visualization.
      For instance, setting `target_indices=[2]` selects the third base color in the optimized palette for visualization.
 
+4. **Color Transfer**:
+    - Leverage the **palette component**:
+      Please follow the steps below to transfer the palette from the target scene:
+      -- Copy the `palette.npz` file from the target scene and place it at the path `log/current_scene/OmniPlanes`.
+      -- Rename the file as `transferred_palette_from_target_scene_name.npz` (replace `target_scene_name` with the actual name of the target scene).
+      -- Then, proceed by following the prompt in the `forward()` function within the `OmniPlanes.py` file.
+      For reference, here’s an example that demonstrates how to transfer the palette from the target scene "Basketball" to the current scene "Lab" in the `forward` function:
+
+     ```python
+     basis_color = self.basis_color[None, :, :].clamp(0, 1)  # [1, num_basis, 3]
+     '''
+     If performing color transfer, please annotate the row above, and unannotate the next three rows. 
+     Also, update the load path and modify the .npz file by copying from your target's 'palette.npz' and renaming it.
+     '''
+     # exchanged_palette = np.load('./log/Lab/OmniPlanes/transfered_palette_from_Basketball.npz')['palette']
+     # exchanged_palette = torch.from_numpy(exchanged_palette).to(device)
+     # basis_color = exchanged_palette[[1, 0, 2, 3]][None, :, :].clamp(0, 1)
+     ```
+
 ## Stabilization
 To get the stabilized video frames, run the script below.
 ```bash
