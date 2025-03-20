@@ -10,9 +10,9 @@ python main.py --config configs/DyOmni/Lab/default.txt
 # For erp coordinate, outdoor scenes
 # python main.py --config configs/DyOmni/Campus/default.txt --sampling_method "simple" --time_grid 100 --r0 0.05 --distance_scale 10.0
 # For yin-yang coordinate, indoor scenes
-# python main.py --config configs/DyOmni/Lab/default.txt --coordinates "yinyang" --sampling_method "simple"
+# python main.py --config configs/DyOmni/Lab/default.txt --model_name "YinYang_OmniPlanes" --coordinates "yinyang" --sampling_method "simple"
 # For yin-yang coordinate, outdoor scenes
-# python main.py --config configs/DyOmni/Campus/default.txt --coordinates "yinyang" --sampling_method "simple" --time_grid 100 --r0 0.05 --distance_scale 10.0
+# python main.py --config configs/DyOmni/Campus/default.txt --model_name "YinYang_OmniPlanes" --coordinates "yinyang" --sampling_method "simple" --time_grid 100 --r0 0.05 --distance_scale 10.0
 # For cpp coordinate, indoor scenes
 # python main.py --config configs/DyOmni/Lab/default.txt --dataset_name "cpp_omnivideos" --sampling_method "simple"
 # For cpp coordinate, outdoor scenes
@@ -37,9 +37,9 @@ python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1 --use_p
 # For erp coordinate, outdoor scenes
 # python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --sampling_method "simple" --time_grid 100 --r0 0.05 --distance_scale 10.0
 # For yin-yang coordinate, indoor scenes
-# python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1 --use_palette --n_iters 30000 --coordinates "yinyang" --sampling_method "simple"
+# python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1 --use_palette --n_iters 30000 --model_name "YinYang_OmniPlanes" --coordinates "yinyang" --sampling_method "simple"
 # For yin-yang coordinate, outdoor scenes
-# python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --coordinates "yinyang" --sampling_method "simple" --time_grid 100 --r0 0.05 --distance_scale 10.0
+# python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --model_name "YinYang_OmniPlanes" --coordinates "yinyang" --sampling_method "simple" --time_grid 100 --r0 0.05 --distance_scale 10.0
 # For cpp coordinate, indoor scenes
 # python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1 --use_palette --n_iters 30000 --dataset_name "cpp_omnivideos" --sampling_method "simple"
 # For cpp coordinate, outdoor scenes
