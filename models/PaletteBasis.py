@@ -3,11 +3,11 @@ import torch.nn.functional as F
 from models.Render_mlp import positional_encoding
 
 class Palette_Basis_Net(torch.nn.Module):
-    def __init__(self, num_basis):
+    def __init__(self, num_basis, input_data_dim=3):
         super(Palette_Basis_Net, self).__init__()
         
         self.pos_encode_dim = 2
-        self.input_data_dim = 3
+        self.input_data_dim = input_data_dim
         self.out_color_dim = 3
 
         self.num_layers_basis = 2
