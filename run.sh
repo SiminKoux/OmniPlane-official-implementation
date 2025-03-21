@@ -49,7 +49,12 @@ python main.py --config configs/DyOmni/Lab/default.txt --palette_train 1 --use_p
 # python main.py --config configs/DyOmni/Lab/default.txt --evaluation 1 --use_palette
 
 # Editing (Inference for recolored videos based on the stage 2's model) 
-# There are different editing options:
+# There are various editing options available for our weighted ERP setups：
+###### 
+# If using different coordinate systems, such as CPP, Yin-Yang, or ERP, 
+# please include their corresponding setups following the same format as the training process. 
+# For example, include --dataset_name "cpp_omnivideos" --sampling_method "simple" for CPP, and so on.
+######
 # 1. Recoloring
 python main.py --config configs/DyOmni/Lab/default.txt --palette_edit 1 --use_palette --recolor
 # 2. Relighting
