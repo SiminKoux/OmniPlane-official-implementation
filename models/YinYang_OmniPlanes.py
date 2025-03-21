@@ -59,7 +59,7 @@ class YinYang_OmniPlanes(TensorBase):
             self.init_coarse_density_volume(self.coarse_sigma_grid_update_rule)
         
         if self.use_palette:
-            self.freeze_basis_color = True
+            # self.freeze_basis_color = True
             self.palette_basis = Palette_Basis_Net(num_basis=self.num_basis, input_data_dim=7).to(device)
             self.initialize_palette(self.init_palette, self.init_hist_weights)
     
