@@ -87,7 +87,7 @@ The `train.txt` and `test.txt` both include all frames, aiming to evaluate its c
 ## Training
 Our recolorable OmniPlane involves two training stages. 
 
-For estimated times for each stage, refer to the **🕒 Timings** section of this document.
+For detailed timing estimates for each stage, refer to the **🕒 Timings** section later in this document.
 
 **Stage 1: Train for OmniPlane**
 
