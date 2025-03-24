@@ -159,12 +159,12 @@ All necessary files should be placed in the directory: ``log/Lab/OmniPlanes``.
 ✅ What to prepare based on what you want to skip:
 - **To skip Stage 1:**
   + Place ``OmniPlanes.th``
-  + Then proceed with *palette extraction* and train for *palette-based color decomposition*
+  + Then perform *palette extraction* and continue training for *palette-based color decomposition*
 - **To skip Stage 1 and Palette Extraction:**
   + Place ``OmniPlanes.th`` and the ``palette`` folder
   + Then train for *palette-based color decomposition*
 - **To skip the entire training process:**
-  + Place ``OmniPlanes.th``, ``OmniPlanes_palette.th`` and ``palette`` folder
+  + Place ``OmniPlanes.th``, ``OmniPlanes_palette.th`` and the ``palette`` folder
   + ✨ Once set up, just follow the provided commands for *testing* and *editing* — no training required!
 
 ## Testing
