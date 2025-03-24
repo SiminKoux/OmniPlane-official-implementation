@@ -151,13 +151,13 @@ python main.py --config configs/DyOmni/specific_instance/default.txt --palette_t
 python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --time_grid 100 --r0 0.05 --distance_scale 10.0
 ```
 
-**Skip Training with Pretrained Models**
+## Skip Training with Pretrained Models ##
 If you'd like to skip part or all of the training process, we've got you covered! You can download [pretrained models](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/El-mcQMQiCJLmdidP3-2bwkBim-12pKyAZ0zl0LVaMPl3g?e=RfOgNe) from OneDrive. These models are trained for the ``Lab`` scene. 
 
-📁 Setup:
+📁 **Setup:**
 
 All necessary files should be placed in the following directory:
- ``log/Lab/OmniPlanes``:
+ ``log/Lab/OmniPlanes``
 
 ✅ What to prepare based on what you want to skip:
 - **To skip Stage 1:**
