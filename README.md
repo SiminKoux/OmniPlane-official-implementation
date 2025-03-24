@@ -345,7 +345,7 @@ log/
 ## Timings
 This section provides the estimated timings for each step of the process based on our test environment. These timings are approximate and may vary based on your specific setup.
 
-<table style="font-size: 10px;">
+<table style="font-size: 5px;">
   <thead>
     <tr>
       <th>Step</th>
