@@ -345,7 +345,7 @@ log/
 ## Timings
 This section provides the estimated timings for each step of the process based on our test environment. These timings are approximate and may vary based on your specific setup.
 
-<table style="font-size: 12px;">
+<table style="font-size: 10px;">
   <thead>
     <tr>
       <th>Step</th>
@@ -362,10 +362,10 @@ This section provides the estimated timings for each step of the process based o
     <tr>
       <td>Inference for Stage 1 Testing</td>
       <td>18-22 seconds / per frame</td>
-      <td>Time for rendering each video frame based on the learned ``OmniPlanes.th``.</td>
+      <td>Time for rendering each video frame based on the learned OmniPlanes.th.</td>
     </tr>
     <tr>
-      <td>Palette Extraction based on the trained ``OmniPlanes.th``</td>
+      <td>Palette Extraction based on the trained OmniPlanes.th</td>
       <td>25-35 minutes</td>
       <td>Time for extracting a global palette throughout the whole video (across all timestamps).</td>
     </tr>
@@ -377,7 +377,7 @@ This section provides the estimated timings for each step of the process based o
     <tr>
       <td>Inference for palette-based Editing</td>
       <td>18-22 seconds / per frame</td>
-      <td>Time for rendering each video frame based on the learned ``OmniPlanes_palette.th`` and individual component modifying process.</td>
+      <td>Time for rendering each video frame based on the learned OmniPlanes_palette.th and individual component modifying process.</td>
     </tr>
   </tbody>
 </table>
