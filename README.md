@@ -154,21 +154,18 @@ python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --us
 ## Skip Training with Pretrained Models ##
 If you'd like to skip part or all of the training process, we've got you covered! You can download [pretrained models](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/El-mcQMQiCJLmdidP3-2bwkBim-12pKyAZ0zl0LVaMPl3g?e=RfOgNe) from OneDrive. These models are trained for the ``Lab`` scene. 
 
-📁 **Setup:**
-
-All necessary files should be placed in the following directory:
- ``log/Lab/OmniPlanes``
+All necessary files should be placed in the directory: ``log/Lab/OmniPlanes``.
 
 ✅ What to prepare based on what you want to skip:
 - **To skip Stage 1:**
   + Place ``OmniPlanes.th``
-  + Then run *palette extraction* and *palette decomposition*
+  + Then proceed with *palette extraction* and train for *palette-based color decomposition*
 - **To skip Stage 1 and Palette Extraction:**
   + Place ``OmniPlanes.th`` and the ``palette`` folder
-  + Then run *palette decomposition*
+  + Then train for *palette-based color decomposition*
 - **To skip the entire training process:**
   + Place ``OmniPlanes.th``, ``OmniPlanes_palette.th`` and ``palette`` folder
-  + After that, you can directly proceed with *testing* and *editing* by the corresponding commands
+  + ✨ Once set up, just follow the provided commands for *testing* and *editing* — no training required!
 
 ## Testing
 To evaluate after training, run the script below.
