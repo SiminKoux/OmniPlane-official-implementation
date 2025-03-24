@@ -345,13 +345,13 @@ log/
 ## 🕒 Timings
 This section provides the estimated timings for each step of the process based on our test environment. These timings are approximate and may vary depending on your specific setup.
 
-| Step                     | Estimated Time | Notes                                         |
+| Step                      | Estimated Time | Notes                                         |
 |---------------------------|----------------|-----------------------------------------------|
-| Stage 1: Training for OmniPlane | 3-4 hours  | For 10,000 iterations. |
-| Inference for Stage 1 Testing   | 18-22 seconds per frame  | For rendering each video frame based on the learned ``OmniPlanes.th``. |
-| Palette Extraction based on the trained ``OmniPlanes.th``  | 25-30 minutes  | For extracting a global palette throughout the video (across all timestamps). |
-| Stage 2: Training for Palette-based Color Decomposition  | 1-2 hours  | For 3,000 iterations.               |
-| Inference for palette-based Editing   | 245-260 seconds per frame  | For rendering each video frame based on the learned ``OmniPlanes_palette.th`` and individual component modifying process. |
+| **Stage 1: Training OmniPlane**                   | 3-4 hours                  | Time for 10,000 iterations.                   |
+| **Stage 1 Inference**                             | 18-22 seconds per frame     | Time to render each frame using the trained `OmniPlanes.th`. |
+| **Palette Extraction (from `OmniPlanes.th`)**     | 25-30 minutes               | Time to extract a global palette across the entire video. |
+| **Stage 2: Training for Palette-based Decomposition** | 1-2 hours                  | Time for 3,000 iterations.                   |
+| **Palette-based Editing Inference**              | 245-260 seconds per frame   | Time to render each frame using `OmniPlanes_palette.th` and the component-modifying process. |
 
 ## Citation
 Cite as below if you find this paper, dataset, and repository helpful to you:
