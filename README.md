@@ -151,12 +151,24 @@ python main.py --config configs/DyOmni/specific_instance/default.txt --palette_t
 python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --time_grid 100 --r0 0.05 --distance_scale 10.0
 ```
 
-**Using Pretrained Models:**
-If you'd like to skip all or part of the training process, you can download [pretrained models](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/El-mcQMQiCJLmdidP3-2bwkBim-12pKyAZ0zl0LVaMPl3g?e=RfOgNe) from OneDrive. The provided models are trained for the ``Lab`` scene. Please follow the instructions below based on the stage you wish to skip:
+**Skip Training with Pretrained Models**
+If you'd like to skip part or all of the training process, we've got you covered! You can download [pretrained models](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/El-mcQMQiCJLmdidP3-2bwkBim-12pKyAZ0zl0LVaMPl3g?e=RfOgNe) from OneDrive. These models are trained for the ``Lab`` scene. 
 
-- **Skip Stage 1:** Download ``OmniPlanes.th`` and place it in ``log/Lab/OmniPlanes``. Then, proceed with *palette extraction* and *palette decomposition*.
-- **Skip Stage 1 and Palette Extraction:** Download ``OmniPlanes.th`` and the ``palette`` folder, and place them in ``log/Lab/OmniPlanes``. Then, proceed with *palette decomposition*.
-- **Skip All Training Stages:** Download all files, ``OmniPlanes.th``, ``OmniPlanes_palette.th`` and ``palette`` folder, and place them in ``log/Lab/OmniPlanes``. After this, you can run the testing and editing operations using the corresponding commands.
+📁 Setup:
+
+All necessary files should be placed in the following directory:
+ ``log/Lab/OmniPlanes``:
+
+✅ What to prepare based on what you want to skip:
+- **To skip Stage 1:**
+  + Place ``OmniPlanes.th``
+  + Then run *palette extraction* and *palette decomposition*
+- **To skip Stage 1 and Palette Extraction:**
+  + Place ``OmniPlanes.th`` and the ``palette`` folder
+  + Then run *palette decomposition*
+- **To skip the entire training process:**
+  + Place ``OmniPlanes.th``, ``OmniPlanes_palette.th`` and ``palette`` folder
+  + After that, you can directly proceed with *testing* and *editing* by the corresponding commands
 
 ## Testing
 To evaluate after training, run the script below.
