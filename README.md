@@ -85,7 +85,7 @@ data/
 The `train.txt` and `test.txt` both include all frames, aiming to evaluate its complete reconstruction performance, not focusing on novel view synthesis capacity. That said, our model does possess a certain generalization ability to generate novel views, so it also supports splitting out some test frames from the entire set of video frames. If you require a complete separation between training and testing images, you can simply adjust the numbers in the `train.txt` and `test.txt` files. These two files directly control which images from the scene are used for training and testing. For example, if you want to alternate frames—using one for training and the next for testing—the `train.txt` would include frames like `1, 3, 5, ..., 99`, while the `test.txt` would contain `2, 4, 6, ..., 100`. This example of train and test splits can be found in the `example` folder of this repository.
 
 ## Training
-Our recolorable OmniPlane involves two training stages.
+Our recolorable OmniPlane involves two training stages. 
 
 **Stage 1: Train for OmniPlane**
 
@@ -150,6 +150,13 @@ python main.py --config configs/DyOmni/specific_instance/default.txt --palette_t
 # For example
 python main.py --config configs/DyOmni/Campus/default.txt --palette_train 1 --use_palette --n_iters 30000 --time_grid 100 --r0 0.05 --distance_scale 10.0
 ```
+
+**Using Pretrained Models:**
+If you'd like to skip all or part of the training process, you can download [pretrained models](https://vuw-my.sharepoint.com/:f:/g/personal/kousi_staff_vuw_ac_nz/El-mcQMQiCJLmdidP3-2bwkBim-12pKyAZ0zl0LVaMPl3g?e=RfOgNe) from OneDrive. The provided models are trained for the ``Lab`` scene. Please follow the instructions below based on the stage you wish to skip:
+
+- **Skip Stage 1:** Download ``OmniPlanes.th`` and place it in ``log/Lab/OmniPlanes``. Then, proceed with *palette extraction* and *palette decomposition*.
+- **Skip Stage 1 and Palette Extraction:** Download ``OmniPlanes.th`` and the ``palette`` folder, and place them in ``log/Lab/OmniPlanes``. Then, proceed with *palette decomposition*.
+- **Skip All Training Stages:** Download all files, ``OmniPlanes.th``, ``OmniPlanes_palette.th`` and ``palette`` folder, and place them in ``log/Lab/OmniPlanes``. After this, you can run the testing and editing operations using the corresponding commands.
 
 ## Testing
 To evaluate after training, run the script below.
