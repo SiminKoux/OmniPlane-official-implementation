@@ -348,14 +348,14 @@ This section provides the estimated timings for each step of the process based o
 <table style="font-size: 5px;">
   <thead>
     <tr>
-      <th>Step</th>
-      <th>Estimated Time</th>
-      <th>Notes</th>
+      <th><small>Step</th>
+      <th><small>Estimated Time</th>
+      <th><small>Notes</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Stage 1: Training for OmniPlane</td>
+      <td><small>Stage 1: Training for OmniPlane</td>
       <td>3-4 hours</td>
       <td>Time for 10,000 iterations.</td>
     </tr>
