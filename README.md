@@ -345,42 +345,13 @@ log/
 ## Timings
 This section provides the estimated timings for each step of the process based on our test environment. These timings are approximate and may vary based on your specific setup.
 
-<table style="font-size: 5px;">
-  <thead>
-    <tr>
-      <th><small>Step</th>
-      <th><small>Estimated Time</th>
-      <th><small>Notes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><small>Stage 1: Training for OmniPlane</td>
-      <td>3-4 hours</td>
-      <td>Time for 10,000 iterations.</td>
-    </tr>
-    <tr>
-      <td>Inference for Stage 1 Testing</td>
-      <td>18-22 seconds / per frame</td>
-      <td>Time for rendering each video frame based on the learned OmniPlanes.th.</td>
-    </tr>
-    <tr>
-      <td>Palette Extraction based on the trained OmniPlanes.th</td>
-      <td>25-35 minutes</td>
-      <td>Time for extracting a global palette throughout the whole video (across all timestamps).</td>
-    </tr>
-    <tr>
-      <td>Stage 2: Training for Palette-based Color Decomposition</td>
-      <td>1-2 hours</td>
-      <td>Time for 3,000 iterations.</td>
-    </tr>
-    <tr>
-      <td>Inference for palette-based Editing</td>
-      <td>18-22 seconds / per frame</td>
-      <td>Time for rendering each video frame based on the learned OmniPlanes_palette.th and individual component modifying process.</td>
-    </tr>
-  </tbody>
-</table>
+| Stage                     | Estimated Time | Notes                                         |
+|---------------------------|----------------|-----------------------------------------------|
+| Stage 1: Training for OmniPlane | 3-4 hours  | Time for 10,000 iterations. |
+| Inference for Stage 1 Testing   | 18-22 seconds / per frame  | Time for rendering each video frame based on the learned ``OmniPlanes.th``. |
+| Palette Extraction based on the trained ``OmniPlanes.th``  | 25-30 minutes  | Time for extracting a global palette throughout the whole video (across all timestamps). |
+| Stage 2: Training for Palette-based Color Decomposition  | 1-2 hours  | Time for 3,000 iterations.               |
+| Inference for palette-based Editing   | 245-260 seconds / per frame  | Time for rendering each video frame based on the learned ``OmniPlanes_palette.th`` and individual component modifying process. |
 
 ## Citation
 Cite as below if you find this paper, dataset, and repository helpful to you:
