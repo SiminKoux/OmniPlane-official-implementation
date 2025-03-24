@@ -342,16 +342,16 @@ log/
 └── ...
 ```
 
-## Timings
-This section provides the estimated timings for each step of the process based on our test environment. These timings are approximate and may vary based on your specific setup.
+## 🕒 Timings
+This section provides the estimated timings for each step of the process based on our test environment. These timings are approximate and may vary depending on your specific setup.
 
-| Stage                     | Estimated Time | Notes                                         |
+| Step                     | Estimated Time | Notes                                         |
 |---------------------------|----------------|-----------------------------------------------|
-| Stage 1: Training for OmniPlane | 3-4 hours  | Time for 10,000 iterations. |
-| Inference for Stage 1 Testing   | 18-22 seconds / per frame  | Time for rendering each video frame based on the learned ``OmniPlanes.th``. |
-| Palette Extraction based on the trained ``OmniPlanes.th``  | 25-30 minutes  | Time for extracting a global palette throughout the whole video (across all timestamps). |
-| Stage 2: Training for Palette-based Color Decomposition  | 1-2 hours  | Time for 3,000 iterations.               |
-| Inference for palette-based Editing   | 245-260 seconds / per frame  | Time for rendering each video frame based on the learned ``OmniPlanes_palette.th`` and individual component modifying process. |
+| Stage 1: Training for OmniPlane | 3-4 hours  | For 10,000 iterations. |
+| Inference for Stage 1 Testing   | 18-22 seconds per frame  | For rendering each video frame based on the learned ``OmniPlanes.th``. |
+| Palette Extraction based on the trained ``OmniPlanes.th``  | 25-30 minutes  | For extracting a global palette throughout the video (across all timestamps). |
+| Stage 2: Training for Palette-based Color Decomposition  | 1-2 hours  | For 3,000 iterations.               |
+| Inference for palette-based Editing   | 245-260 seconds per frame  | For rendering each video frame based on the learned ``OmniPlanes_palette.th`` and individual component modifying process. |
 
 ## Citation
 Cite as below if you find this paper, dataset, and repository helpful to you:
