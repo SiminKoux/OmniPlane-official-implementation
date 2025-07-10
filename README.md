@@ -363,6 +363,9 @@ Cite as below if you find this paper, dataset, and repository helpful to you:
   author={Kou, Simin and Zhang, Fang-Lue and Nazarenus, Jakob and Koch, Reinhard and Dodgson, Neil A},
   journal={IEEE Transactions on Visualization and Computer Graphics},
   year={2025},
+  volume={31},
+  number={7},
+  pages={4095-4109},
   publisher={IEEE},
   doi={10.1109/TVCG.2025.3531763}
 }
