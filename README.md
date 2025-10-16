@@ -1,6 +1,6 @@
 # OmniPlane: A Recolorable Representation for Dynamic Scenes in Omnidirectional Videos
 
-This repository is the official PyTorch implementation of [OmniPlane](https://ieeexplore.ieee.org/document/10847904/media#media), which is accepted by TVCG. You can watch our [video demo](https://vimeo.com/1066790171?share=copy) here.
+This repository is the official PyTorch implementation of [OmniPlane](https://ieeexplore.ieee.org/document/10847904/media#media), which is published by TVCG. You can watch our [video demo](https://vimeo.com/1066790171?share=copy) here.
 
 ## Overview
 OmniPlane is a feature-grid-based dynamic scene representation for modeling Omnidirectional (360-degree) videos, utilizing weighted ERP spherical coordinates with time dependency. Incorporating palette-based color decomposition to achieve intuitive recoloring.
